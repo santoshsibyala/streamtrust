@@ -4,11 +4,11 @@ This preset runs a **built local LibreChat checkout**, native browser UI and rea
 
 ## Installation
 
-This preset is currently available from the StreamTrust source repository, **not npm version 0.1.1**. In a separate verification project, install the reviewed StreamTrust Git commit (the pinned SHA below is the CI-verified implementation):
+Use Node.js 24 and npm 11. In a separate verification project, install StreamTrust 0.2.0 from npm:
 
 ```sh
 npm init -y
-npm install --save-dev github:santoshsibyala/streamtrust#b1b2b27a19b512c6abce164502901d1716bf86a3
+npm install --save-dev --save-exact streamtrust@0.2.0
 npm install --save-dev --save-exact playwright@1.64.1 mongodb@6.20.0 mongodb-memory-server@11.3.0
 npx playwright install chromium
 npx streamtrust init streamtrust-librechat --preset librechat
@@ -84,7 +84,7 @@ The model provider is synthetic. The test uses one server and an in-memory strea
 
 The exported `streamtrust/checks` evaluator can be reused by other adapters. Map observations to `LifecycleObservation`; the evaluator validates required types, computes checks, and returns summary-only evidence. Missing or malformed observations throw, becoming HARNESS_ERROR rather than a green result.
 
-## Validation of this preview
+## Validation
 
 Local validation used macOS arm64, Node 24.22.1, Playwright 1.64.1 Chromium 156.0.8078.4, MongoDB 8.2.6, and the pinned LibreChat commit. A clean tarball consumer passed all four scenarios with three repetitions (12 executions, 99 assertions). A checkout containing an environment file was rejected with exit 2. Success and error artifact checks found only the four intended files and no tested secret/chat-text markers. The package suite has 13 tests, including negative controls for shared checks and stale-screenshot exclusion.
 

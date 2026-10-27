@@ -6,7 +6,7 @@
 
 Adapter-driven CI checks for streaming applications: compare observed output with authoritative state, exercise cancellation, and verify retry identity.
 
-**Status:** `0.1.1`, an early 0.x release for independent teams. APIs and report formats may change before 1.0. The CLI is dependency-free, ESM, and requires Node.js 22+. MIT licensed. Browser and database libraries belong to your adapter and are not installed by StreamTrust.
+**Status:** `0.2.0`, an early 0.x release for independent teams. APIs and report formats may change before 1.0. The CLI is dependency-free, ESM, and requires Node.js 22+. MIT licensed. Browser and database libraries belong to your adapter and are not installed by StreamTrust.
 
 ## Watch the 66-second demo
 
@@ -24,13 +24,13 @@ npx streamtrust init
 npx streamtrust verify --adapter ./streamtrust/adapter.mjs
 ```
 
-For reproducible CI, pin `streamtrust@0.1.1` and commit your lockfile. The generated adapter initially exercises the bundled demonstration; map it to your application before using its results as application evidence.
+For reproducible CI, pin `streamtrust@0.2.0` and commit your lockfile. The generated adapter initially exercises the bundled demonstration; map it to your application before using its results as application evidence.
 
-## LibreChat integration (source preview)
+## LibreChat integration
 
 A LibreChat preset now exercises persistence, native Stop, regeneration and error-retry through its browser UI and disposable MongoDB. It uses reusable `streamtrust/checks` assertions and summary-only evidence; no chat text, screenshots or application logs are included in its reports.
 
-**This preset is not in npm 0.1.1.** Install a reviewed source commit using the [LibreChat quick start and CI guide](examples/librechat/README.md). It requires Node 24 and optional Playwright/MongoDB dependencies. An [integration workflow](.github/workflows/librechat.yml) exercises the packed CLI against the pinned upstream version. The default `init` demonstration remains available.
+**Available in StreamTrust 0.2.0.** Install from npm using the [LibreChat quick start and CI guide](examples/librechat/README.md). It requires Node 24 and optional Playwright/MongoDB dependencies. An [integration workflow](.github/workflows/librechat.yml) exercises the packed CLI against the pinned upstream version. The default `init` demonstration remains available.
 
 ## Run from source
 
@@ -50,7 +50,7 @@ Build the tarball with `npm pack` in this repository.
 Put the supplied tarball in your project's `vendor/` directory, then:
 
 ```sh
-npm install --save-dev ./vendor/streamtrust-0.1.1.tgz
+npm install --save-dev ./vendor/streamtrust-0.2.0.tgz
 npx streamtrust init
 npx streamtrust verify --adapter ./streamtrust/adapter.mjs
 ```
@@ -146,7 +146,7 @@ Add StreamTrust as a test step in your existing CI. For GitHub Actions, follow t
 1. Install StreamTrust and create the starting adapter:
 
    ```sh
-   npm install --save-dev --save-exact streamtrust@0.1.1
+   npm install --save-dev --save-exact streamtrust@0.2.0
    npx streamtrust init
    ```
 
@@ -229,6 +229,6 @@ Use a unique output directory per concurrent job. The CLI takes an exclusive loc
 
 ## Scope and attribution
 
-StreamTrust checks what an adapter asserts. It does not prove exactly-once external effects, AI factuality, automatic recovery, production incident rates or adoption. The HTTP demo is synthetic. Separate development experiments have tested pinned Vercel Chatbot and LibreChat applications; the LibreChat adapter is now available as a source-preview preset with optional dependencies. The Vercel experiment remains separate.
+StreamTrust checks what an adapter asserts. It does not prove exactly-once external effects, AI factuality, automatic recovery, production incident rates or adoption. The HTTP demo is synthetic. Separate development experiments have tested pinned Vercel Chatbot and LibreChat applications; the LibreChat adapter is now available as an npm preset with optional dependencies. The Vercel experiment remains separate.
 
 Local preparation: `npm pack` in this package directory runs the package tests and creates the tarball. The public repository runs tests and a clean tarball installation on Node.js 22 and 24. This release is published interactively; npm build provenance is not configured.
