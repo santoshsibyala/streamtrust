@@ -30,7 +30,7 @@ For reproducible CI, pin `streamtrust@0.1.1` and commit your lockfile. The gener
 
 A LibreChat preset now exercises persistence, native Stop, regeneration and error-retry through its browser UI and disposable MongoDB. It uses reusable `streamtrust/checks` assertions and summary-only evidence; no chat text, screenshots or application logs are included in its reports.
 
-**This preset is not in npm 0.1.1.** Install a reviewed source commit using the [LibreChat quick start and CI guide](examples/librechat/README.md). It requires Node 24 and optional Playwright/MongoDB dependencies. A [manual integration workflow](.github/workflows/librechat.yml) exercises the packed CLI against the pinned upstream version. The default `init` demonstration remains available.
+**This preset is not in npm 0.1.1.** Install a reviewed source commit using the [LibreChat quick start and CI guide](examples/librechat/README.md). It requires Node 24 and optional Playwright/MongoDB dependencies. An [integration workflow](.github/workflows/librechat.yml) exercises the packed CLI against the pinned upstream version. The default `init` demonstration remains available.
 
 ## Run from source
 

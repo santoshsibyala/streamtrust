@@ -4,11 +4,11 @@ This preset runs a **built local LibreChat checkout**, native browser UI and rea
 
 ## Installation
 
-This preset is currently available from the StreamTrust source repository, **not npm version 0.1.1**. In a separate verification project, install the reviewed StreamTrust Git commit (replace `STREAMTRUST_COMMIT` with its full SHA):
+This preset is currently available from the StreamTrust source repository, **not npm version 0.1.1**. In a separate verification project, install the reviewed StreamTrust Git commit (the pinned SHA below is the CI-verified implementation):
 
 ```sh
 npm init -y
-npm install --save-dev github:santoshsibyala/streamtrust#STREAMTRUST_COMMIT
+npm install --save-dev github:santoshsibyala/streamtrust#b1b2b27a19b512c6abce164502901d1716bf86a3
 npm install --save-dev --save-exact playwright@1.64.1 mongodb@6.20.0 mongodb-memory-server@11.3.0
 npx playwright install chromium
 npx streamtrust init streamtrust-librechat --preset librechat
@@ -88,4 +88,4 @@ The exported `streamtrust/checks` evaluator can be reused by other adapters. Map
 
 Local validation used macOS arm64, Node 24.22.1, Playwright 1.64.1 Chromium 156.0.8078.4, MongoDB 8.2.6, and the pinned LibreChat commit. A clean tarball consumer passed all four scenarios with three repetitions (12 executions, 99 assertions). A checkout containing an environment file was rejected with exit 2. Success and error artifact checks found only the four intended files and no tested secret/chat-text markers. The package suite has 13 tests, including negative controls for shared checks and stale-screenshot exclusion.
 
-The Linux GitHub Actions integration workflow is provided but has not yet been executed for this preview. The existing local checkout was already built; the cold clone/install/build path is based on the prior pinned-app setup and remains to be validated by that workflow. Passing results do not establish an upstream defect or production reliability.
+The [Linux GitHub Actions run](https://github.com/santoshsibyala/streamtrust/actions/runs/40451851475) also passed a cold clone/install/build, clean tarball installation, all 12 scenario executions, and upload of exactly the four report files. The verified implementation commit is `b1b2b27a19b512c6abce164502901d1716bf86a3`. Passing results do not establish an upstream defect or production reliability.
