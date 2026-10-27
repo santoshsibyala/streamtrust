@@ -8,6 +8,14 @@ Adapter-driven CI checks for streaming applications: compare observed output wit
 
 **Status:** `0.1.1`, an early 0.x release for independent teams. APIs and report formats may change before 1.0. The CLI is dependency-free, ESM, and requires Node.js 22+. MIT licensed. Browser and database libraries belong to your adapter and are not installed by StreamTrust.
 
+## Watch the 60-second demo
+
+[![Watch the StreamTrust demo: persistence, cancellation, retry, and CI diagnostics](docs/media/streamtrust-demo-poster.png)](https://github.com/santoshsibyala/streamtrust/blob/main/docs/media/streamtrust-demo-0.1.1.mp4)
+
+**[Watch the demo](https://github.com/santoshsibyala/streamtrust/blob/main/docs/media/streamtrust-demo-0.1.1.mp4)** · [Download MP4](https://raw.githubusercontent.com/santoshsibyala/streamtrust/main/docs/media/streamtrust-demo-0.1.1.mp4)
+
+A captioned walkthrough with no audio: install StreamTrust, run the example checks, inspect the diagnostic report, and see a deliberate save failure return a nonzero CI exit code. Recorded with version 0.1.1. The bundled application and injected failure are demonstrations; connect an adapter to your own application to verify its behavior.
+
 ## Install
 
 ```sh
