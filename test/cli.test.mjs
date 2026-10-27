@@ -143,9 +143,10 @@ test('unsupported scenarios are non-green and setup/cleanup errors remain harnes
   }
 });
 
-
 test('CLI and success/error reports identify the installed package version', async () => {
-  const { version } = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8'));
+  const { version } = JSON.parse(
+    await readFile(new URL('../package.json', import.meta.url), 'utf8'),
+  );
   const cwd = await mkdtemp(join(tmpdir(), 'streamtrust-version-'));
   try {
     const cliVersion = await run(['--version'], cwd);
@@ -153,16 +154,66 @@ test('CLI and success/error reports identify the installed package version', asy
     assert.equal(cliVersion.text.trim(), version);
     const help = await run(['--help'], cwd);
     assert.ok(help.text.includes(`StreamTrust ${version}`));
-    for (const [adapter, exitCode, output] of [[example, 0, 'success'], ['missing.mjs', 2, 'error']]) {
-      const result = await run(['verify', '--adapter', adapter, '--output', output, '--repetitions', '1'], cwd);
+    for (const [adapter, exitCode, output] of [
+      [example, 0, 'success'],
+      ['missing.mjs', 2, 'error'],
+    ]) {
+      const result = await run(
+        [
+          'verify',
+          '--adapter',
+          adapter,
+          '--output',
+          output,
+          '--repetitions',
+          '1',
+        ],
+        cwd,
+      );
       assert.equal(result.code, exitCode, result.text);
-      const report = JSON.parse(await readFile(join(cwd, output, 'report.json'), 'utf8'));
+      const report = JSON.parse(
+        await readFile(join(cwd, output, 'report.json'), 'utf8'),
+      );
       assert.equal(report.version, version);
       for (const file of ['report.md', 'index.html']) {
         const content = await readFile(join(cwd, output, file), 'utf8');
-        assert.ok(content.includes(`StreamTrust ${version}`), `${output}/${file} version`);
+        assert.ok(
+          content.includes(`StreamTrust ${version}`),
+          `${output}/${file} version`,
+        );
       }
     }
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
+test('LibreChat preset scaffolds all files without overwriting user changes', async () => {
+  const cwd = await mkdtemp(join(tmpdir(), 'streamtrust-librechat-init-'));
+  try {
+    assert.equal(
+      (await run(['init', 'integration', '--preset', 'librechat'], cwd)).code,
+      0,
+    );
+    for (const file of [
+      'adapter.mjs',
+      'provider.mjs',
+      'setup.mjs',
+      'README.md',
+    ])
+      assert.ok(
+        (await readFile(join(cwd, 'integration', file), 'utf8')).length > 0,
+      );
+    await writeFile(join(cwd, 'integration/adapter.mjs'), 'custom');
+    assert.equal(
+      (await run(['init', 'integration', '--preset', 'librechat'], cwd)).code,
+      2,
+    );
+    assert.equal(
+      await readFile(join(cwd, 'integration/adapter.mjs'), 'utf8'),
+      'custom',
+    );
+    assert.equal((await run(['init', '--preset', 'unknown'], cwd)).code, 2);
   } finally {
     await rm(cwd, { recursive: true, force: true });
   }

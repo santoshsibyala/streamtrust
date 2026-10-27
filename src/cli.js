@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { mkdir, copyFile, open, unlink, readFile } from 'node:fs/promises';
 import { constants } from 'node:fs';
 import { VERSION, failureReport } from './index.js';
-const HELP = `StreamTrust ${VERSION}\n\nUsage:\n  streamtrust init [directory]\n  streamtrust verify --adapter ./streamtrust/adapter.mjs [options]\n\nOptions:\n  --output <directory>    Reports (default: reports/streamtrust)\n  --repetitions <1-1000>   Repetitions per scenario (default: 3)\n  --timeout-ms <integer>  Total run deadline including setup/cleanup (default: 300000)\n  --help                 Show help\n  --version              Show version\n\nExit codes: 0 all pass; 1 failed/unsupported checks; 2 setup, timeout or harness error.\nAdapters execute trusted local code. JavaScript ESM (.mjs) works without dependencies.\n`;
+const HELP = `StreamTrust ${VERSION}\n\nUsage:\n  streamtrust init [directory] [--preset librechat]\n  streamtrust verify --adapter ./streamtrust/adapter.mjs [options]\n\nOptions:\n  --output <directory>    Reports (default: reports/streamtrust)\n  --repetitions <1-1000>   Repetitions per scenario (default: 3)\n  --timeout-ms <integer>  Total run deadline including setup/cleanup (default: 300000)\n  --help                 Show help\n  --version              Show version\n\nExit codes: 0 all pass; 1 failed/unsupported checks; 2 setup, timeout or harness error.\nAdapters execute trusted local code. JavaScript ESM (.mjs) works without dependencies.\n`;
 export async function main(args) {
   let outputDir;
   try {
@@ -18,17 +18,32 @@ export async function main(args) {
       return 0;
     }
     if (args[0] === 'init') {
-      if (args.length > 2 || args[1]?.startsWith('-'))
-        throw new Error('Usage: streamtrust init [directory]');
-      const dir = resolve(args[1] ?? 'streamtrust');
+      const initArgs = args.slice(1);
+      const presetIndex = initArgs.indexOf('--preset');
+      let preset = 'http';
+      if (presetIndex !== -1) {
+        preset = initArgs[presetIndex + 1];
+        initArgs.splice(presetIndex, 2);
+        if (preset !== 'librechat') throw new Error('Unknown init preset');
+      }
+      if (initArgs.length > 1 || initArgs[0]?.startsWith('-'))
+        throw new Error('Invalid init arguments');
+      const dir = resolve(initArgs[0] ?? 'streamtrust');
       await mkdir(dir, { recursive: true });
       // Exclusive copies preserve existing adapters. No generated config overrides user files.
       const created = [];
       try {
-        for (const [source, target] of [
-          ['http.adapter.mjs', 'adapter.mjs'],
-          ['demo-app.mjs', 'demo-app.mjs'],
-        ]) {
+        for (const [source, target] of preset === 'librechat'
+          ? [
+              ['librechat/adapter.mjs', 'adapter.mjs'],
+              ['librechat/provider.mjs', 'provider.mjs'],
+              ['librechat/setup.mjs', 'setup.mjs'],
+              ['librechat/README.md', 'README.md'],
+            ]
+          : [
+              ['http.adapter.mjs', 'adapter.mjs'],
+              ['demo-app.mjs', 'demo-app.mjs'],
+            ]) {
           const destination = resolve(dir, target);
           await copyFile(
             new URL(`../examples/${source}`, import.meta.url),

@@ -26,6 +26,12 @@ npx streamtrust verify --adapter ./streamtrust/adapter.mjs
 
 For reproducible CI, pin `streamtrust@0.1.1` and commit your lockfile. The generated adapter initially exercises the bundled demonstration; map it to your application before using its results as application evidence.
 
+## LibreChat integration (source preview)
+
+A LibreChat preset now exercises persistence, native Stop, regeneration and error-retry through its browser UI and disposable MongoDB. It uses reusable `streamtrust/checks` assertions and summary-only evidence; no chat text, screenshots or application logs are included in its reports.
+
+**This preset is not in npm 0.1.1.** Install a reviewed source commit using the [LibreChat quick start and CI guide](examples/librechat/README.md). It requires Node 24 and optional Playwright/MongoDB dependencies. An [integration workflow](.github/workflows/librechat.yml) exercises the packed CLI against the pinned upstream version. The default `init` demonstration remains available.
+
 ## Run from source
 
 ```sh
@@ -223,6 +229,6 @@ Use a unique output directory per concurrent job. The CLI takes an exclusive loc
 
 ## Scope and attribution
 
-StreamTrust checks what an adapter asserts. It does not prove exactly-once external effects, AI factuality, automatic recovery, production incident rates or adoption. The HTTP demo is synthetic. Separate development experiments have tested pinned Vercel Chatbot and LibreChat applications; their adapters and dependencies are not bundled here.
+StreamTrust checks what an adapter asserts. It does not prove exactly-once external effects, AI factuality, automatic recovery, production incident rates or adoption. The HTTP demo is synthetic. Separate development experiments have tested pinned Vercel Chatbot and LibreChat applications; the LibreChat adapter is now available as a source-preview preset with optional dependencies. The Vercel experiment remains separate.
 
 Local preparation: `npm pack` in this package directory runs the package tests and creates the tarball. The public repository runs tests and a clean tarball installation on Node.js 22 and 24. This release is published interactively; npm build provenance is not configured.
