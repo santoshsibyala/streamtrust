@@ -10,11 +10,11 @@ Adapter-driven CI checks for streaming applications: compare observed output wit
 
 ## Watch the 60-second demo
 
-[![Open the narrated StreamTrust demo: persistence, cancellation, retry, and CI diagnostics](docs/media/streamtrust-demo-poster.png)](https://raw.githubusercontent.com/santoshsibyala/streamtrust/main/docs/media/streamtrust-demo-0.1.1-narrated.mp4)
+[![Open the narrated StreamTrust demo: persistence, cancellation, retry, and CI diagnostics](docs/media/streamtrust-demo-poster.png)](https://santoshsibyala.github.io/streamtrust/)
 
-**[Open or download the narrated demo (MP4)](https://raw.githubusercontent.com/santoshsibyala/streamtrust/main/docs/media/streamtrust-demo-0.1.1-narrated.mp4)** · [Read the transcript](docs/media/streamtrust-demo-transcript.txt) · [Download subtitles](docs/media/streamtrust-demo-0.1.1.srt) · [Silent version](https://raw.githubusercontent.com/santoshsibyala/streamtrust/main/docs/media/streamtrust-demo-0.1.1.mp4)
+**[Watch the narrated demo in your browser](https://santoshsibyala.github.io/streamtrust/)** · [Read the transcript](docs/media/streamtrust-demo-transcript.txt) · [Download subtitles](docs/media/streamtrust-demo-0.1.1.srt) · [Silent version](https://raw.githubusercontent.com/santoshsibyala/streamtrust/main/docs/media/streamtrust-demo-0.1.1.mp4)
 
-A walkthrough with synthetic English narration, on-screen captions, and an optional English subtitle track: install StreamTrust, run the example checks, inspect the diagnostic report, and see a deliberate save failure return a nonzero CI exit code. Recorded with version 0.1.1. The bundled application and injected failure are demonstrations; connect an adapter to your own application to verify its behavior. Depending on your browser, the MP4 may download for playback in your video player.
+A walkthrough with synthetic English narration, on-screen captions, and an optional English subtitle track: install StreamTrust, run the example checks, inspect the diagnostic report, and see a deliberate save failure return a nonzero CI exit code. Recorded with version 0.1.1. The bundled application and injected failure are demonstrations; connect an adapter to your own application to verify its behavior. The browser player includes playback controls, captions, and an MP4 download option.
 
 ## Install
 

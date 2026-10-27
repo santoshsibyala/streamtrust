@@ -1,0 +1,29 @@
+WEBVTT
+
+1
+00:00:00.250 --> 00:00:05.800
+Stream Trust checks whether streaming applications save answers. handle cancellation. and preserve retry history.
+
+2
+00:00:06.300 --> 00:00:13.850
+Install Stream Trust. generate an adapter. and run verification. The starting adapter exercises a bundled demonstration.
+
+3
+00:00:14.400 --> 00:00:22.449
+Here. all three lifecycle checks pass. These are actual results from version zero point one point one. with one repetition shown.
+
+4
+00:00:23.450 --> 00:00:31.050
+Each run produces reports with named checks and evidence. Use HTML for review. and JUnit results in your CI pipeline.
+
+5
+00:00:31.700 --> 00:00:38.278
+Now we deliberately drop the saved answer in the demo. Checks fail. and exit code one makes the CI step fail.
+
+6
+00:00:40.800 --> 00:00:48.200
+To test your application. map the adapter to its real operations and saved state. Passing this demo does not verify your app.
+
+7
+00:00:48.850 --> 00:00:58.649
+Try Stream Trust from npm. connect your application. and review the evidence. The source and setup guide are on GitHub. Feedback from independent teams is welcome.
