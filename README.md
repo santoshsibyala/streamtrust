@@ -1,5 +1,9 @@
 # StreamTrust CLI
 
+[![npm version](https://img.shields.io/npm/v/streamtrust.svg)](https://www.npmjs.com/package/streamtrust)
+
+**[View StreamTrust on npm](https://www.npmjs.com/package/streamtrust)**
+
 Adapter-driven CI checks for streaming applications: compare observed output with authoritative state, exercise cancellation, and verify retry identity.
 
 **Status:** `0.1.1`, an early 0.x release for independent teams. APIs and report formats may change before 1.0. The CLI is dependency-free, ESM, and requires Node.js 22+. MIT licensed. Browser and database libraries belong to your adapter and are not installed by StreamTrust.
