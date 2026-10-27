@@ -1,0 +1,15 @@
+StreamTrust 0.1.1 demo — synthetic English narration (Samantha)
+
+Stream Trust checks whether streaming applications save answers, handle cancellation, and preserve retry history.
+
+Install Stream Trust, generate an adapter, and run verification. The starting adapter exercises a bundled demonstration.
+
+Here, all three lifecycle checks pass. These are actual results from version zero point one point one, with one repetition shown.
+
+Each run produces reports with named checks and evidence. Use HTML for review, and JUnit results in your CI pipeline.
+
+Now we deliberately drop the saved answer in the demo. Checks fail, and exit code one makes the CI step fail.
+
+To test your application, map the adapter to its real operations and saved state. Passing this demo does not verify your app.
+
+Try Stream Trust from npm, connect your application, and review the evidence. The source and setup guide are on GitHub. Feedback from independent teams is welcome.
