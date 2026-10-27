@@ -1,4 +1,4 @@
-StreamTrust 0.1.1 demo — synthetic English narration (Samantha)
+StreamTrust 0.1.1 demo — synthetic English narration (ElevenLabs Brian — Clean, Professional and Balanced)
 
 Stream Trust checks whether streaming applications save answers, handle cancellation, and preserve retry history.
 
