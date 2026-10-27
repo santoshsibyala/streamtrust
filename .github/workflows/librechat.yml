@@ -1,0 +1,45 @@
+name: LibreChat integration
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  librechat:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - run: npm test
+      - name: Install packaged CLI in a clean consumer
+        shell: bash
+        run: |
+          npm pack --ignore-scripts --pack-destination "$RUNNER_TEMP"
+          mkdir "$RUNNER_TEMP/consumer"
+          cd "$RUNNER_TEMP/consumer"
+          npm init -y
+          npm install --save-dev "$RUNNER_TEMP/streamtrust-$(node -p "require('$GITHUB_WORKSPACE/package.json').version").tgz" playwright@1.64.1 mongodb@6.20.0 mongodb-memory-server@11.3.0
+          npx --no-install playwright install --with-deps chromium
+          npx --no-install streamtrust init streamtrust-librechat --preset librechat
+      - name: Build pinned LibreChat
+        working-directory: ${{ runner.temp }}/consumer
+        run: node streamtrust-librechat/setup.mjs
+        env:
+          STREAMTRUST_LIBRECHAT_ROOT: ${{ runner.temp }}/librechat
+      - name: Verify all four scenarios
+        working-directory: ${{ runner.temp }}/consumer
+        run: npx --no-install streamtrust verify --adapter streamtrust-librechat/adapter.mjs --output reports/librechat --repetitions 3 --timeout-ms 600000
+        env:
+          STREAMTRUST_LIBRECHAT_ROOT: ${{ runner.temp }}/librechat
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: librechat-safe-reports
+          path: |
+            ${{ runner.temp }}/consumer/reports/librechat/report.json
+            ${{ runner.temp }}/consumer/reports/librechat/report.md
+            ${{ runner.temp }}/consumer/reports/librechat/junit.xml
+            ${{ runner.temp }}/consumer/reports/librechat/index.html
+          retention-days: 7

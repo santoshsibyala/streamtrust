@@ -63,13 +63,15 @@ export async function writeReports(outputDir, report) {
   const rows = report.results;
   const screenshots = new Set();
   await Promise.all(
-    rows.map(async (row) => {
-      const path = `${row.scenario}-${row.repetition}.png`;
-      try {
-        await access(resolve(outputDir, path));
-        screenshots.add(path);
-      } catch {}
-    }),
+    (report.metadata?.evidencePolicy === 'summary-only-v1' ? [] : rows).map(
+      async (row) => {
+        const path = `${row.scenario}-${row.repetition}.png`;
+        try {
+          await access(resolve(outputDir, path));
+          screenshots.add(path);
+        } catch {}
+      },
+    ),
   );
   const suiteCases = report.suiteErrors
     .map(
