@@ -1,6 +1,6 @@
 {
   "name": "streamtrust",
-  "version": "0.1.0-preview.1",
+  "version": "0.1.0",
   "description": "Adapter-driven CI verification for streaming application lifecycle guarantees",
   "type": "module",
   "license": "MIT",
@@ -45,7 +45,7 @@
   },
   "publishConfig": {
     "access": "public",
-    "tag": "preview",
+    "tag": "latest",
     "registry": "https://registry.npmjs.org/"
   }
 }

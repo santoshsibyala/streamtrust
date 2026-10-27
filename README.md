@@ -1,18 +1,18 @@
-# StreamTrust CLI — pilot release
+# StreamTrust CLI
 
 Adapter-driven CI checks for streaming applications: compare observed output with authoritative state, exercise cancellation, and verify retry identity.
 
-**Status:** `0.1.0-preview.1`, an experimental preview for independent pilots. APIs and report formats may change before a stable release. The CLI is dependency-free, ESM, and requires Node.js 22+. MIT licensed. Browser and database libraries belong to your adapter and are not installed by StreamTrust.
+**Status:** `0.1.0`, an early 0.x release for independent teams. APIs and report formats may change before 1.0. The CLI is dependency-free, ESM, and requires Node.js 22+. MIT licensed. Browser and database libraries belong to your adapter and are not installed by StreamTrust.
 
-## Install the npm preview
+## Install
 
 ```sh
-npm install --save-dev streamtrust@preview
+npm install --save-dev streamtrust
 npx streamtrust init
 npx streamtrust verify --adapter ./streamtrust/adapter.mjs
 ```
 
-For reproducible CI, pin `streamtrust@0.1.0-preview.1` and commit your lockfile. The `preview` tag is intentionally separate from a stable release. The generated adapter initially exercises the bundled demonstration; map it to your application before using its results as application evidence.
+For reproducible CI, pin `streamtrust@0.1.0` and commit your lockfile. The generated adapter initially exercises the bundled demonstration; map it to your application before using its results as application evidence.
 
 ## Run from source
 
@@ -32,7 +32,7 @@ Build the tarball with `npm pack` in this repository.
 Put the supplied tarball in your project's `vendor/` directory, then:
 
 ```sh
-npm install --save-dev ./vendor/streamtrust-0.1.0-preview.1.tgz
+npm install --save-dev ./vendor/streamtrust-0.1.0.tgz
 npx streamtrust init
 npx streamtrust verify --adapter ./streamtrust/adapter.mjs
 ```
@@ -123,7 +123,7 @@ node --import tsx ./node_modules/streamtrust/bin/streamtrust.js verify \
 
 ## CI
 
-Install the pinned preview and commit package.json and package-lock.json so CI can use `npm ci`. If using a locally built tarball instead, keep it in `vendor/` so the committed file dependency can be resolved. The example workflow assumes the application under test is already running; add its start/wait commands before verification. Omit the base URL only when intentionally testing the bundled demonstration.
+Install the pinned version and commit package.json and package-lock.json so CI can use `npm ci`. If using a locally built tarball instead, keep it in `vendor/` so the committed file dependency can be resolved. The example workflow assumes the application under test is already running; add its start/wait commands before verification. Omit the base URL only when intentionally testing the bundled demonstration.
 
 ```yaml
 name: Streaming application verification
@@ -159,10 +159,10 @@ jobs:
 
 Use a unique output directory per concurrent job. The CLI takes an exclusive lock and records a fresh run ID; it cannot reuse an old passing report after setup failure. Reports are overwritten on subsequent runs. If a process was forcibly killed, remove a stale `.streamtrust.lock` only after confirming that process has stopped. Invalid arguments and lock contention fail before a run starts and do not replace existing evidence.
 
-`--timeout-ms` bounds the entire invocation, including factory setup and cleanup (default five minutes), followed by up to one second of termination grace. On Linux/macOS the CLI terminates its worker process group, including ordinary child processes. Adapters that detach external services must arrange their own cleanup. Windows process-tree cleanup is not validated in this pilot. An outer CI timeout remains useful.
+`--timeout-ms` bounds the entire invocation, including factory setup and cleanup (default five minutes), followed by up to one second of termination grace. On Linux/macOS the CLI terminates its worker process group, including ordinary child processes. Adapters that detach external services must arrange their own cleanup. Windows process-tree cleanup is not validated in this release. An outer CI timeout remains useful.
 
 ## Scope and attribution
 
 StreamTrust checks what an adapter asserts. It does not prove exactly-once external effects, AI factuality, automatic recovery, production incident rates or adoption. The HTTP demo is synthetic. Separate development experiments have tested pinned Vercel Chatbot and LibreChat applications; their adapters and dependencies are not bundled here.
 
-Local preparation: `npm pack` in this package directory runs the package tests and creates the tarball. The public repository runs tests and a clean tarball installation on Node.js 22 and 24. This preview is prepared for interactive publication; npm build provenance is not configured.
+Local preparation: `npm pack` in this package directory runs the package tests and creates the tarball. The public repository runs tests and a clean tarball installation on Node.js 22 and 24. This release is published interactively; npm build provenance is not configured.
