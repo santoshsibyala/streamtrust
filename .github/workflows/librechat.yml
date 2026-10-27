@@ -1,6 +1,12 @@
 name: LibreChat integration
 on:
   workflow_dispatch:
+  pull_request:
+    paths:
+      - 'examples/librechat/**'
+      - 'src/**'
+      - 'package.json'
+      - '.github/workflows/librechat.yml'
 permissions:
   contents: read
 jobs:
