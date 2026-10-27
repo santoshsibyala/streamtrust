@@ -1,6 +1,6 @@
 {
   "name": "streamtrust",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Adapter-driven CI verification for streaming application lifecycle guarantees",
   "type": "module",
   "license": "MIT",

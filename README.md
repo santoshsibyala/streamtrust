@@ -2,7 +2,7 @@
 
 Adapter-driven CI checks for streaming applications: compare observed output with authoritative state, exercise cancellation, and verify retry identity.
 
-**Status:** `0.1.0`, an early 0.x release for independent teams. APIs and report formats may change before 1.0. The CLI is dependency-free, ESM, and requires Node.js 22+. MIT licensed. Browser and database libraries belong to your adapter and are not installed by StreamTrust.
+**Status:** `0.1.1`, an early 0.x release for independent teams. APIs and report formats may change before 1.0. The CLI is dependency-free, ESM, and requires Node.js 22+. MIT licensed. Browser and database libraries belong to your adapter and are not installed by StreamTrust.
 
 ## Install
 
@@ -12,7 +12,7 @@ npx streamtrust init
 npx streamtrust verify --adapter ./streamtrust/adapter.mjs
 ```
 
-For reproducible CI, pin `streamtrust@0.1.0` and commit your lockfile. The generated adapter initially exercises the bundled demonstration; map it to your application before using its results as application evidence.
+For reproducible CI, pin `streamtrust@0.1.1` and commit your lockfile. The generated adapter initially exercises the bundled demonstration; map it to your application before using its results as application evidence.
 
 ## Run from source
 
@@ -32,7 +32,7 @@ Build the tarball with `npm pack` in this repository.
 Put the supplied tarball in your project's `vendor/` directory, then:
 
 ```sh
-npm install --save-dev ./vendor/streamtrust-0.1.0.tgz
+npm install --save-dev ./vendor/streamtrust-0.1.1.tgz
 npx streamtrust init
 npx streamtrust verify --adapter ./streamtrust/adapter.mjs
 ```

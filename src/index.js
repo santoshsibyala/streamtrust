@@ -1,7 +1,10 @@
 import { mkdir, writeFile, rename, access } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { randomUUID } from 'node:crypto';
-export const VERSION = '0.1.0-preview.1';
+import { readFileSync } from 'node:fs';
+export const VERSION = JSON.parse(
+  readFileSync(new URL('../package.json', import.meta.url), 'utf8'),
+).version;
 const object = (value) =>
   value !== null && typeof value === 'object' && !Array.isArray(value);
 const nonempty = (value) =>
