@@ -1,0 +1,32 @@
+name: CLI verification
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      matrix:
+        node: [22, 24]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - run: npm test
+      - run: npm pack --ignore-scripts
+      - name: Install and exercise the tarball
+        shell: bash
+        run: |
+          package_path="$PWD/streamtrust-0.1.0-preview.1.tgz"
+          consumer_dir="$(mktemp -d)"
+          cd "$consumer_dir"
+          npm init -y
+          npm install --offline --ignore-scripts --no-audit --no-fund "$package_path"
+          npx --offline streamtrust init
+          npx --offline streamtrust verify --adapter streamtrust/adapter.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: streamtrust-node-${{ matrix.node }}
+          path: '*.tgz'

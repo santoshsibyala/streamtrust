@@ -1,0 +1,46 @@
+{
+  "name": "streamtrust",
+  "version": "0.1.0-preview.1",
+  "description": "Adapter-driven CI verification for streaming application lifecycle guarantees",
+  "type": "module",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22"
+  },
+  "bin": {
+    "streamtrust": "bin/streamtrust.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./src/index.d.ts",
+      "import": "./src/index.js"
+    }
+  },
+  "types": "src/index.d.ts",
+  "files": [
+    "bin/",
+    "src/",
+    "examples/",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "prepack": "npm test"
+  },
+  "keywords": [
+    "ci",
+    "streaming",
+    "verification",
+    "testing",
+    "sse"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/santoshsibyala/streamtrust.git"
+  },
+  "homepage": "https://github.com/santoshsibyala/streamtrust#readme",
+  "bugs": {
+    "url": "https://github.com/santoshsibyala/streamtrust/issues"
+  }
+}
