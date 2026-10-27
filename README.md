@@ -123,33 +123,81 @@ node --import tsx ./node_modules/streamtrust/bin/streamtrust.js verify \
 
 ## CI
 
-Install the pinned version and commit package.json and package-lock.json so CI can use `npm ci`. If using a locally built tarball instead, keep it in `vendor/` so the committed file dependency can be resolved. The example workflow assumes the application under test is already running; add its start/wait commands before verification. Omit the base URL only when intentionally testing the bundled demonstration.
+Add StreamTrust as a test step in your existing CI. For GitHub Actions, follow these steps:
+
+1. Install StreamTrust and create the starting adapter:
+
+   ```sh
+   npm install --save-dev --save-exact streamtrust@0.1.1
+   npx streamtrust init
+   ```
+
+2. Adapt `streamtrust/adapter.mjs` to your application's native start, stream, cancel, retry, and saved-state operations. **The generated adapter initially tests a bundled demo. Setting a base URL alone does not adapt it to arbitrary application APIs.** See [Connect your application](#connect-your-application) above.
+3. Commit the adapter, `package.json`, and `package-lock.json`. If the adapter imports browser or database libraries, add those dependencies and their required CI setup too.
+4. Save the workflow below as `.github/workflows/streamtrust.yml`, or copy its relevant steps into an existing job.
+
+**Replace `npm run start:test`, port `3000`, and `/health` with your application's test-server command and readiness endpoint.** These are placeholders, not commands or routes supplied by StreamTrust. Add any required build, database, migration, fixture, or browser-install steps before starting your app. Use a disposable test environment because the checks create and modify application state.
 
 ```yaml
 name: Streaming application verification
 on: [push, pull_request]
+permissions:
+  contents: read
 jobs:
   verify:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
+
       - run: npm ci
-      # Start your test application and wait for readiness here.
-      - run: npx --no-install streamtrust verify --adapter ./streamtrust/adapter.mjs --output reports/streamtrust
+
+      # Add your application's build and test-service setup here.
+      - name: Start application and wait for readiness
+        shell: bash
+        run: |
+          npm run start:test > app.log 2>&1 &
+          app_pid=$!
+          for attempt in {1..30}; do
+            if ! kill -0 "$app_pid" 2>/dev/null; then
+              cat app.log
+              exit 1
+            fi
+            if curl --fail --silent --max-time 2 http://localhost:3000/health; then
+              exit 0
+            fi
+            sleep 2
+          done
+          cat app.log
+          echo "Application did not become ready in time."
+          exit 1
+
+      - name: Verify streaming behavior
+        run: |
+          npx --no-install streamtrust verify \
+            --adapter ./streamtrust/adapter.mjs \
+            --output ./reports/streamtrust
         env:
-          STREAMTRUST_BASE_URL: http://127.0.0.1:8080
-          STREAMTRUST_API_TOKEN: ${{ secrets.TEST_APP_TOKEN }}
-      - uses: actions/upload-artifact@v4
+          STREAMTRUST_BASE_URL: http://localhost:3000
+
+      - name: Save diagnostic reports
         if: always()
+        uses: actions/upload-artifact@v4
         with:
-          name: streamtrust-evidence
+          name: streamtrust-reports
           path: reports/streamtrust/
 ```
+
+If your application is already running in the job, omit the startup step and point your adapter at its test URL. For the bundled HTTP adapter's optional bearer authentication, add `STREAMTRUST_API_TOKEN: ${{ secrets.TEST_APP_TOKEN }}` to the verification step's `env`, and configure that secret in GitHub. Fork pull requests generally do not receive repository secrets; use a suitable unauthenticated test fixture or an explicitly trusted workflow for those runs. Never put credentials in the adapter or uploaded evidence.
+
+A failed assertion or harness error fails the verification step. The report-upload step runs even after a failure, so teams can inspect diagnostics when they were generated; startup failures may have no StreamTrust report. To block merging, configure the repository's branch protection or ruleset to require this workflow's `verify` check. StreamTrust does not configure merge rules itself.
+
+If you use a locally built tarball instead of npm, keep it in `vendor/` and commit the corresponding file dependency and lockfile so `npm ci` can resolve it.
 
 | Exit | Meaning |
 |---|---|
