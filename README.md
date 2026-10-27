@@ -2,7 +2,17 @@
 
 Adapter-driven CI checks for streaming applications: compare observed output with authoritative state, exercise cancellation, and verify retry identity.
 
-**Status:** `0.1.0-preview.1`, prepared as a local npm tarball; not published to the npm registry. The CLI is dependency-free, ESM, and requires Node.js 22+. MIT licensed. Browser and database libraries belong to your adapter and are not installed by StreamTrust.
+**Status:** `0.1.0-preview.1`, an experimental preview for independent pilots. APIs and report formats may change before a stable release. The CLI is dependency-free, ESM, and requires Node.js 22+. MIT licensed. Browser and database libraries belong to your adapter and are not installed by StreamTrust.
+
+## Install the npm preview
+
+```sh
+npm install --save-dev streamtrust@preview
+npx streamtrust init
+npx streamtrust verify --adapter ./streamtrust/adapter.mjs
+```
+
+For reproducible CI, pin `streamtrust@0.1.0-preview.1` and commit your lockfile. The `preview` tag is intentionally separate from a stable release. The generated adapter initially exercises the bundled demonstration; map it to your application before using its results as application evidence.
 
 ## Run from source
 
@@ -113,7 +123,7 @@ node --import tsx ./node_modules/streamtrust/bin/streamtrust.js verify \
 
 ## CI
 
-Keep the pilot tarball in `vendor/` so `npm ci` can resolve the committed file dependency, or place the package in your organization's registry. The example workflow assumes the application under test is already running; add its start/wait commands before verification. Omit the base URL only when intentionally testing the bundled demonstration.
+Install the pinned preview and commit package.json and package-lock.json so CI can use `npm ci`. If using a locally built tarball instead, keep it in `vendor/` so the committed file dependency can be resolved. The example workflow assumes the application under test is already running; add its start/wait commands before verification. Omit the base URL only when intentionally testing the bundled demonstration.
 
 ```yaml
 name: Streaming application verification
@@ -155,4 +165,4 @@ Use a unique output directory per concurrent job. The CLI takes an exclusive loc
 
 StreamTrust checks what an adapter asserts. It does not prove exactly-once external effects, AI factuality, automatic recovery, production incident rates or adoption. The HTTP demo is synthetic. Separate development experiments have tested pinned Vercel Chatbot and LibreChat applications; their adapters and dependencies are not bundled here.
 
-Local preparation: `npm pack` in this package directory runs the package tests and creates the tarball. Public publication, ownership of the npm name, release signing/provenance and hosted CI execution remain separate release steps. No public registry install is promised by this preview guide.
+Local preparation: `npm pack` in this package directory runs the package tests and creates the tarball. The public repository runs tests and a clean tarball installation on Node.js 22 and 24. This preview is prepared for interactive publication; npm build provenance is not configured.

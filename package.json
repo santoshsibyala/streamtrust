@@ -42,5 +42,10 @@
   "homepage": "https://github.com/santoshsibyala/streamtrust#readme",
   "bugs": {
     "url": "https://github.com/santoshsibyala/streamtrust/issues"
+  },
+  "publishConfig": {
+    "access": "public",
+    "tag": "preview",
+    "registry": "https://registry.npmjs.org/"
   }
 }
