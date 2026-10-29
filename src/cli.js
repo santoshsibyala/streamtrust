@@ -1,11 +1,29 @@
 import { fork } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
-import { resolve } from 'node:path';
+import { resolve, join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { mkdir, copyFile, open, unlink, readFile } from 'node:fs/promises';
 import { constants } from 'node:fs';
 import { VERSION, failureReport } from './index.js';
-const HELP = `StreamTrust ${VERSION}\n\nUsage:\n  streamtrust init [directory] [--preset librechat]\n  streamtrust verify --adapter ./streamtrust/adapter.mjs [options]\n\nOptions:\n  --output <directory>    Reports (default: reports/streamtrust)\n  --repetitions <1-1000>   Repetitions per scenario (default: 3)\n  --timeout-ms <integer>  Total run deadline including setup/cleanup (default: 300000)\n  --help                 Show help\n  --version              Show version\n\nExit codes: 0 all pass; 1 failed/unsupported checks; 2 setup, timeout or harness error.\nAdapters execute trusted local code. JavaScript ESM (.mjs) works without dependencies.\n`;
+const EXAMPLES = fileURLToPath(new URL('../examples/', import.meta.url));
+// Explicit source inventory: never copy local builds, dependencies or configuration.
+const PRESETS = {
+  http: [['http.adapter.mjs', 'adapter.mjs'], ['demo-app.mjs', 'demo-app.mjs']],
+  librechat: ['adapter.mjs', 'provider.mjs', 'setup.mjs', 'README.md'].map(
+    (name) => [`librechat/${name}`, name]),
+  'vercel-ai': [
+    'adapter.mjs', 'provider.mjs', 'setup.mjs', 'config.mjs', 'README.md',
+    'reference-app/package.json', 'reference-app/npm-shrinkwrap.json',
+    'reference-app/next.config.mjs', 'reference-app/lib/store.js',
+    'reference-app/app/layout.jsx', 'reference-app/app/page.jsx',
+    'reference-app/app/api/chat/route.js', 'reference-app/app/chat/[id]/chat.jsx',
+    'reference-app/app/chat/[id]/page.jsx',
+  ].map((name) => [`vercel-ai/${name}`, name]),
+};
+export function presets() { return Object.keys(PRESETS); }
+function presetFiles(preset) { return PRESETS[preset]; }
+const HELP = () =>
+  `StreamTrust ${VERSION}\n\nUsage:\n  streamtrust init [directory] [--preset <name>]\n  streamtrust verify --adapter ./streamtrust/adapter.mjs [options]\n\nOptions:\n  --output <directory>    Reports (default: reports/streamtrust)\n  --repetitions <1-1000>   Repetitions per scenario (default: 3)\n  --timeout-ms <integer>  Total run deadline including setup/cleanup (default: 300000)\n  --help                 Show help\n  --version              Show version\n\nPresets: ${presets().join(', ')} (default: http)\n\nExit codes: 0 all pass; 1 failed/unsupported checks; 2 setup, timeout or harness error.\nAdapters execute trusted local code. JavaScript ESM (.mjs) works without dependencies.\n`;
 export async function main(args) {
   let outputDir;
   try {
@@ -14,7 +32,7 @@ export async function main(args) {
       return 0;
     }
     if (!args.length || args.includes('--help')) {
-      console.log(HELP);
+      console.log(HELP());
       return 0;
     }
     if (args[0] === 'init') {
@@ -24,7 +42,10 @@ export async function main(args) {
       if (presetIndex !== -1) {
         preset = initArgs[presetIndex + 1];
         initArgs.splice(presetIndex, 2);
-        if (preset !== 'librechat') throw new Error('Unknown init preset');
+        if (!presets().includes(preset))
+          throw new Error(
+            `Unknown init preset; available: ${presets().join(', ')}`,
+          );
       }
       if (initArgs.length > 1 || initArgs[0]?.startsWith('-'))
         throw new Error('Invalid init arguments');
@@ -33,20 +54,11 @@ export async function main(args) {
       // Exclusive copies preserve existing adapters. No generated config overrides user files.
       const created = [];
       try {
-        for (const [source, target] of preset === 'librechat'
-          ? [
-              ['librechat/adapter.mjs', 'adapter.mjs'],
-              ['librechat/provider.mjs', 'provider.mjs'],
-              ['librechat/setup.mjs', 'setup.mjs'],
-              ['librechat/README.md', 'README.md'],
-            ]
-          : [
-              ['http.adapter.mjs', 'adapter.mjs'],
-              ['demo-app.mjs', 'demo-app.mjs'],
-            ]) {
+        for (const [source, target] of presetFiles(preset)) {
           const destination = resolve(dir, target);
+          await mkdir(dirname(destination), { recursive: true });
           await copyFile(
-            new URL(`../examples/${source}`, import.meta.url),
+            join(EXAMPLES, source),
             destination,
             constants.COPYFILE_EXCL,
           );

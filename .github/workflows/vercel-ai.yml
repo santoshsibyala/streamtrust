@@ -1,0 +1,58 @@
+name: Vercel AI SDK integration
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'examples/vercel-ai/**'
+      - 'src/**'
+      - 'test/**'
+      - 'package.json'
+      - '.github/workflows/vercel-ai.yml'
+  pull_request:
+    paths:
+      - 'examples/vercel-ai/**'
+      - 'src/**'
+      - 'test/**'
+      - 'package.json'
+      - '.github/workflows/vercel-ai.yml'
+permissions:
+  contents: read
+jobs:
+  vercel-ai:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: npm test
+      - name: Install packaged CLI in a clean consumer
+        shell: bash
+        run: |
+          npm pack --ignore-scripts --pack-destination "$RUNNER_TEMP"
+          mkdir "$RUNNER_TEMP/consumer"
+          cd "$RUNNER_TEMP/consumer"
+          npm init -y
+          npm install --save-dev "$RUNNER_TEMP/streamtrust-$(node -p "require('$GITHUB_WORKSPACE/package.json').version").tgz" playwright@1.64.1
+          npx --no-install playwright install --with-deps chromium
+          npx --no-install streamtrust init streamtrust-vercel-ai --preset vercel-ai
+      - name: Build reference app
+        working-directory: ${{ runner.temp }}/consumer
+        run: node streamtrust-vercel-ai/setup.mjs
+      - name: Verify all four scenarios
+        working-directory: ${{ runner.temp }}/consumer
+        run: npx --no-install streamtrust verify --adapter streamtrust-vercel-ai/adapter.mjs --output reports/vercel-ai --repetitions 3 --timeout-ms 600000
+      - name: Verify negative controls in the disposable reference app
+        run: node test/vercel-ai-controls.mjs "$RUNNER_TEMP/consumer" streamtrust-vercel-ai
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: vercel-ai-safe-reports
+          path: |
+            ${{ runner.temp }}/consumer/reports/vercel-ai/report.json
+            ${{ runner.temp }}/consumer/reports/vercel-ai/report.md
+            ${{ runner.temp }}/consumer/reports/vercel-ai/junit.xml
+            ${{ runner.temp }}/consumer/reports/vercel-ai/index.html
+          retention-days: 7

@@ -4,9 +4,13 @@
 
 **[View StreamTrust on npm](https://www.npmjs.com/package/streamtrust)**
 
-Adapter-driven CI checks for streaming applications: compare observed output with authoritative state, exercise cancellation, and verify retry identity.
+StreamTrust is a CI check for streaming applications such as AI chat. Its reusable checks compare what was displayed with what the application authoritatively saved and report disagreements as failed checks. It does not replace Playwright: Playwright drives the browser, and the bundled presets use it inside their adapters.
 
-**Status:** `0.2.0`, an early 0.x release for independent teams. APIs and report formats may change before 1.0. The CLI is dependency-free, ESM, and requires Node.js 22+. MIT licensed. Browser and database libraries belong to your adapter and are not installed by StreamTrust.
+- **Three outcomes, kept apart.** "The app failed" (FAIL), "this capability is not supported" (UNSUPPORTED) and "we could not determine whether it failed" (HARNESS_ERROR) are reported separately, and harness errors exit with their own code.
+- **Repeated runs.** Each scenario runs N times and the report shows every repetition, because cancellation and retry bugs are often intermittent.
+- **Your contract, written down.** An adapter implements your app's start, stream, cancel, retry and saved-state operations; StreamTrust invokes the adapter scenarios and writes JSON, JUnit, Markdown and HTML reports.
+
+**Status:** `0.3.0`, an early 0.x release for independent teams. APIs and report formats may change before 1.0. The CLI is dependency-free, ESM, and requires Node.js 22+. MIT licensed. Browser and database libraries belong to your adapter and are not installed by StreamTrust.
 
 ## Watch the 66-second demo
 
@@ -24,13 +28,19 @@ npx streamtrust init
 npx streamtrust verify --adapter ./streamtrust/adapter.mjs
 ```
 
-For reproducible CI, pin `streamtrust@0.2.0` and commit your lockfile. The generated adapter initially exercises the bundled demonstration; map it to your application before using its results as application evidence.
+For reproducible CI, pin `streamtrust@0.3.0` and commit your lockfile. The generated adapter initially exercises the bundled demonstration; map it to your application before using its results as application evidence.
 
 ## LibreChat integration
 
 A LibreChat preset now exercises persistence, native Stop, regeneration and error-retry through its browser UI and disposable MongoDB. It uses reusable `streamtrust/checks` assertions and summary-only evidence; no chat text, screenshots or application logs are included in its reports.
 
-**Available in StreamTrust 0.2.0.** Install from npm using the [LibreChat quick start and CI guide](examples/librechat/README.md). It requires Node 24 and optional Playwright/MongoDB dependencies. An [integration workflow](.github/workflows/librechat.yml) exercises the packed CLI against the pinned upstream version. The default `init` demonstration remains available.
+**Available since StreamTrust 0.2.0.** Install from npm using the [LibreChat quick start and CI guide](examples/librechat/README.md). It requires Node 24 and optional Playwright/MongoDB dependencies. An [integration workflow](.github/workflows/librechat.yml) exercises the packed CLI against the pinned upstream version. The default `init` demonstration remains available.
+
+## Vercel AI SDK integration
+
+A `vercel-ai` preset runs a minimal Next.js chat built on the AI SDK (`useChat`, `streamText`) in production mode with a synthetic OpenAI-compatible provider, so it needs no API key. It covers the same four scenarios through the browser and the app's saved state, and can be pointed at your own built AI SDK app after you adjust its selectors and saved-state read. It is not an official Vercel integration.
+
+**Available in StreamTrust 0.3.0.** Install from npm and generate it with `npx streamtrust init streamtrust-vercel-ai --preset vercel-ai`. See the [Vercel AI SDK quick start](examples/vercel-ai/README.md) for what it does and does not verify. It requires Node 22+ and Playwright in your verification project. An [integration workflow](.github/workflows/vercel-ai.yml) exercises the packed CLI against the reference app.
 
 ## Run from source
 
@@ -50,7 +60,7 @@ Build the tarball with `npm pack` in this repository.
 Put the supplied tarball in your project's `vendor/` directory, then:
 
 ```sh
-npm install --save-dev ./vendor/streamtrust-0.2.0.tgz
+npm install --save-dev ./vendor/streamtrust-0.3.0.tgz
 npx streamtrust init
 npx streamtrust verify --adapter ./streamtrust/adapter.mjs
 ```
@@ -146,7 +156,7 @@ Add StreamTrust as a test step in your existing CI. For GitHub Actions, follow t
 1. Install StreamTrust and create the starting adapter:
 
    ```sh
-   npm install --save-dev --save-exact streamtrust@0.2.0
+   npm install --save-dev --save-exact streamtrust@0.3.0
    npx streamtrust init
    ```
 
@@ -229,6 +239,6 @@ Use a unique output directory per concurrent job. The CLI takes an exclusive loc
 
 ## Scope and attribution
 
-StreamTrust checks what an adapter asserts. It does not prove exactly-once external effects, AI factuality, automatic recovery, production incident rates or adoption. The HTTP demo is synthetic. Separate development experiments have tested pinned Vercel Chatbot and LibreChat applications; the LibreChat adapter is now available as an npm preset with optional dependencies. The Vercel experiment remains separate.
+StreamTrust checks what an adapter asserts. It does not prove exactly-once external effects, AI factuality, automatic recovery, production incident rates or adoption. The HTTP demo is synthetic. Separate development experiments have tested pinned Vercel Chatbot and LibreChat applications; the LibreChat adapter is now available as an npm preset with optional dependencies. The `vercel-ai` preset targets its own minimal reference app, not the Vercel Chatbot template; that experiment remains separate.
 
 Local preparation: `npm pack` in this package directory runs the package tests and creates the tarball. The public repository runs tests and a clean tarball installation on Node.js 22 and 24. This release is published interactively; npm build provenance is not configured.

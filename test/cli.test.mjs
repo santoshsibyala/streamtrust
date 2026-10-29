@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
-import { mkdtemp, readFile, writeFile, rm } from 'node:fs/promises';
+import { mkdtemp, mkdir, readFile, writeFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { resolve, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -214,6 +214,55 @@ test('LibreChat preset scaffolds all files without overwriting user changes', as
       'custom',
     );
     assert.equal((await run(['init', '--preset', 'unknown'], cwd)).code, 2);
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
+test('presets are listed by name and copied recursively with rollback on conflict', async () => {
+  const cwd = await mkdtemp(join(tmpdir(), 'streamtrust-presets-'));
+  try {
+    const help = await run(['--help'], cwd);
+    assert.ok(
+      help.text.includes('Presets: http, librechat, vercel-ai'),
+      help.text,
+    );
+    assert.equal((await run(['init', 'h', '--preset', 'http'], cwd)).code, 0);
+    assert.ok((await readFile(join(cwd, 'h/demo-app.mjs'), 'utf8')).length);
+    for (const preset of ['../examples', 'examples', '.', ''])
+      assert.equal(
+        (await run(['init', 'bad', '--preset', preset], cwd)).code,
+        2,
+        preset,
+      );
+    assert.equal((await run(['init', 'bad', '--preset'], cwd)).code, 2);
+    assert.equal(
+      (await run(['init', 'v', '--preset', 'vercel-ai'], cwd)).code,
+      0,
+    );
+    for (const file of [
+      'adapter.mjs',
+      'provider.mjs',
+      'setup.mjs',
+      'README.md',
+      'reference-app/package.json',
+      'reference-app/app/api/chat/route.js',
+      'reference-app/app/chat/[id]/chat.jsx',
+    ])
+      assert.ok((await readFile(join(cwd, 'v', file), 'utf8')).length, file);
+    await mkdir(join(cwd, 'conflict/reference-app/lib'), { recursive: true });
+    await writeFile(join(cwd, 'conflict/reference-app/lib/store.js'), 'mine');
+    assert.equal(
+      (await run(['init', 'conflict', '--preset', 'vercel-ai'], cwd)).code,
+      2,
+    );
+    assert.equal(
+      await readFile(join(cwd, 'conflict/reference-app/lib/store.js'), 'utf8'),
+      'mine',
+    );
+    await assert.rejects(readFile(join(cwd, 'conflict/adapter.mjs')), {
+      code: 'ENOENT',
+    });
   } finally {
     await rm(cwd, { recursive: true, force: true });
   }

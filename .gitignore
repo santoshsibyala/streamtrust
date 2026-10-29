@@ -6,3 +6,5 @@ demo/
 .env.*
 *.log
 .DS_Store
+
+.next/

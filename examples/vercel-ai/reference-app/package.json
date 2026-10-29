@@ -1,0 +1,21 @@
+{
+  "name": "streamtrust-vercel-ai-reference-app",
+  "private": true,
+  "description": "Minimal Next.js + AI SDK chat used as the StreamTrust vercel-ai preset's application under test",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "@ai-sdk/openai-compatible": "3.0.68",
+    "@ai-sdk/react": "4.0.141",
+    "ai": "7.0.138",
+    "next": "16.4.3",
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
+  }
+}

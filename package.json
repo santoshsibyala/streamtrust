@@ -1,6 +1,6 @@
 {
   "name": "streamtrust",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Adapter-driven CI verification for streaming application lifecycle guarantees",
   "type": "module",
   "license": "MIT",
@@ -24,7 +24,18 @@
   "files": [
     "bin/",
     "src/",
-    "examples/",
+    "examples/http.adapter.mjs",
+    "examples/demo-app.mjs",
+    "examples/librechat/*.mjs",
+    "examples/librechat/README.md",
+    "examples/vercel-ai/*.mjs",
+    "examples/vercel-ai/README.md",
+    "examples/vercel-ai/reference-app/package.json",
+    "examples/vercel-ai/reference-app/npm-shrinkwrap.json",
+    "examples/vercel-ai/reference-app/next.config.mjs",
+    "examples/vercel-ai/reference-app/lib/*.js",
+    "examples/vercel-ai/reference-app/app/**/*.js",
+    "examples/vercel-ai/reference-app/app/**/*.jsx",
     "README.md",
     "LICENSE"
   ],
