@@ -164,6 +164,14 @@ Check out your repository, install adapter dependencies, and start your test ser
 
 Use `@v1.0.0` to pin this Action release; `@v1` follows compatible Action updates. The generated HTTP adapter initially tests a bundled demo: adapt it to your application before treating its results as application coverage. Adapters run trusted repository code; use disposable test data and keep secrets out of uploaded reports.
 
+### Published HTTP/SSE demo
+
+StreamTrust uses the published Action in its own CI. This [successful main-branch run](https://github.com/santoshsibyala/streamtrust/actions/runs/42171351265) used Action v1.0.0 and CLI 0.3.0 on Node 22: persistence, cancellation, and retry each passed three repetitions (9 PASS).
+
+[![Published HTTP/SSE demo: StreamTrust Action job summary showing 9 PASS, 0 FAIL, 0 UNSUPPORTED, and 0 HARNESS_ERROR](docs/images/published-action-http-sse-summary.png)](https://github.com/santoshsibyala/streamtrust/actions/runs/42171351265#summary-127739661923)
+
+This run checks the bundled HTTP/SSE teaching demo. The existing CLI, LibreChat, and Vercel AI SDK workflows separately test the package built from the current checkout.
+
 ## CI
 
 Add StreamTrust as a test step in your existing CI. For GitHub Actions, follow these steps:
