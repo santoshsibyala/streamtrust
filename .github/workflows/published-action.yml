@@ -1,0 +1,34 @@
+name: Published StreamTrust Action smoke test
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+
+# This exercises the published CLI and its bundled HTTP/SSE teaching fixture.
+# ci.yml, librechat.yml and vercel-ai.yml retain their local-tarball checks:
+# replacing those calls with this Action would stop testing unreleased code.
+jobs:
+  published-action:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      # No checkout: keep this published-package smoke test isolated from source.
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '22'
+          package-manager-cache: false
+      - name: Initialize published HTTP/SSE example
+        run: npx --yes streamtrust@0.3.0 init published-example
+        env:
+          npm_config_ignore_scripts: 'true'
+          npm_config_audit: 'false'
+          npm_config_fund: 'false'
+      - name: Verify published example and publish job summary
+        uses: santoshsibyala/streamtrust-action@e5119b155271a4b06d556acee1b9687514f0ee4f # v1.0.0
+        with:
+          adapter: published-example/adapter.mjs
+          version: '0.3.0'
+          node-version: '22'
+          output: reports/published-action
+          repetitions: '3'
+          artifact-name: published-action-http-sse
+          fail-on: failures
