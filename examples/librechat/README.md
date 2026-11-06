@@ -74,6 +74,31 @@ Use a fresh report directory for each job. Restrict workflow permissions to `con
 
 Exit 0 means all declared checks passed; 1 means failed or unsupported checks; 2 means setup, timeout, or harness error. Keep the exit status: do not use `continue-on-error`. Inspect reports before calling a failure an upstream defect.
 
+## Run in CI
+
+To use the published GitHub Action, keep the checkout, dependency installation, Playwright installation, and build steps in the CI example above. Replace only its verify step with:
+
+```yaml
+- name: Verify LibreChat with StreamTrust Action
+  uses: santoshsibyala/streamtrust-action@v1
+  with:
+    adapter: streamtrust-librechat/adapter.mjs
+    version: '0.3.0'
+    node-version: '24'
+    output: reports/librechat
+    repetitions: '3'
+    timeout-ms: '600000'
+    artifact-name: librechat-action-report
+    upload-report: 'false'
+    fail-on: failures
+  env:
+    STREAMTRUST_LIBRECHAT_ROOT: ${{ runner.temp }}/librechat
+```
+
+Keep the existing upload step: `upload-report: 'false'` disables the Action's directory upload so CI continues uploading only the four listed report files. The Action still adds a job summary and fails the job on failed or unsupported checks and harness errors. Use a fresh report directory for each invocation.
+
+`@v1` receives compatible Action updates; `@v1.0.0` pins the exact Action release. The CLI version is pinned separately by `version`. See the [Action README](https://github.com/santoshsibyala/streamtrust-action/blob/main/README.md) for setup, inputs, outputs, and failure policies. This uses the published CLI; retain direct CLI calls when testing a locally built, unreleased StreamTrust package.
+
 ## Evidence and limits
 
 `summary-only-v1` returns stable check identifiers, booleans, message counts and provider-call counts. Raw chat text, database records, user identifiers, network URLs and tokens remain in memory and are not returned as report evidence. The preset does not write screenshots, browser traces or application logs. Browser/database exceptions are replaced with fixed errors. App subprocess output is discarded. Upload only the four report files, not the entire working directory.

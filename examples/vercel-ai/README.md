@@ -93,6 +93,29 @@ Run the installation steps once, then commit your verification project package.j
 
 Exit 0 means all declared checks passed; 1 means failed or unsupported checks; 2 means setup, timeout or harness error. Keep the exit status: do not use `continue-on-error`.
 
+## Run in CI
+
+To use the published GitHub Action, keep the checkout, dependency installation, Playwright installation, and build steps in the CI example above. Replace only its verify step with:
+
+```yaml
+- name: Verify AI SDK app with StreamTrust Action
+  uses: santoshsibyala/streamtrust-action@v1
+  with:
+    adapter: streamtrust-vercel-ai/adapter.mjs
+    version: '0.3.0'
+    node-version: '22'
+    output: reports/vercel-ai
+    repetitions: '3'
+    timeout-ms: '600000'
+    artifact-name: vercel-ai-action-report
+    upload-report: 'false'
+    fail-on: failures
+```
+
+Keep the existing upload step: `upload-report: 'false'` disables the Action's directory upload so CI continues uploading only the four listed report files. The Action still adds a job summary and fails the job on failed or unsupported checks and harness errors. Use a fresh report directory for each invocation.
+
+`@v1` receives compatible Action updates; `@v1.0.0` pins the exact Action release. The CLI version is pinned separately by `version`. See the [Action README](https://github.com/santoshsibyala/streamtrust-action/blob/main/README.md) for setup, inputs, outputs, and failure policies. This uses the published CLI; retain direct CLI calls when testing a locally built, unreleased StreamTrust package.
+
 ## Evidence and limits
 
 Reports use `summary-only-v1`: stable check names, booleans, message counts and provider-call counts. Chat text, message ids, URLs and file paths stay in memory. Reports replace browser and app exceptions with fixed messages even in debug mode. Debug mode prints raw errors to the console; do not enable it in CI that retains logs. This is data minimization, not a sandbox: the adapter and the app under test are trusted code.

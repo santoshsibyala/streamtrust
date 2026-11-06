@@ -30,6 +30,30 @@ npx streamtrust verify --adapter ./streamtrust/adapter.mjs
 
 For reproducible CI, pin `streamtrust@0.3.0` and commit your lockfile. The generated adapter initially exercises the bundled demonstration; map it to your application before using its results as application evidence.
 
+## GitHub Action
+
+Run StreamTrust through the [official composite GitHub Action](https://github.com/santoshsibyala/streamtrust-action), listed as [StreamTrust CI Verifier on GitHub Marketplace](https://github.com/marketplace/actions/streamtrust-ci-verifier):
+
+```yaml
+- uses: santoshsibyala/streamtrust-action@v1
+  with:
+    adapter: ./streamtrust/adapter.mjs
+    node-version: "22"
+    artifact-name: streamtrust-report
+```
+
+Check out your repository, install adapter dependencies, and start your test services first. The Action runs the pinned StreamTrust CLI, adds a job summary, and uploads diagnostic reports even when verification fails. By default, failed or unsupported checks and harness errors fail the job. See the [complete workflow, inputs, outputs, and failure policies](https://github.com/santoshsibyala/streamtrust-action/blob/main/README.md).
+
+Use `@v1.0.0` to pin this Action release; `@v1` follows compatible Action updates. The generated HTTP adapter initially tests a bundled demo: adapt it to your application before treating its results as application coverage. Adapters run trusted repository code; use disposable test data and keep secrets out of uploaded reports.
+
+### Published HTTP/SSE demo
+
+StreamTrust uses the published Action in its own CI. This [successful main-branch run](https://github.com/santoshsibyala/streamtrust/actions/runs/42171351265) used Action v1.0.0 and CLI 0.3.0 on Node 22: persistence, cancellation, and retry each passed three repetitions (9 PASS).
+
+[![Published HTTP/SSE demo: StreamTrust Action job summary showing 9 PASS, 0 FAIL, 0 UNSUPPORTED, and 0 HARNESS_ERROR](docs/images/published-action-http-sse-summary.png)](https://github.com/santoshsibyala/streamtrust/actions/runs/42171351265#summary-127739661923)
+
+This run checks the bundled HTTP/SSE teaching demo. The existing CLI, LibreChat, and Vercel AI SDK workflows separately test the package built from the current checkout.
+
 ## LibreChat integration
 
 A LibreChat preset now exercises persistence, native Stop, regeneration and error-retry through its browser UI and disposable MongoDB. It uses reusable `streamtrust/checks` assertions and summary-only evidence; no chat text, screenshots or application logs are included in its reports.
@@ -148,29 +172,6 @@ npm install --save-dev tsx
 node --import tsx ./node_modules/streamtrust/bin/streamtrust.js verify \
   --adapter ./streamtrust/adapter.ts
 ```
-
-## GitHub Action
-
-Run StreamTrust through the [official composite GitHub Action](https://github.com/santoshsibyala/streamtrust-action):
-
-```yaml
-- uses: santoshsibyala/streamtrust-action@v1
-  with:
-    adapter: ./streamtrust/adapter.mjs
-    node-version: "22"
-```
-
-Check out your repository, install adapter dependencies, and start your test services first. The Action runs the pinned StreamTrust CLI, adds a job summary, and uploads diagnostic reports even when verification fails. By default, failed or unsupported checks and harness errors fail the job. See the [complete workflow, inputs, outputs, and failure policies](https://github.com/santoshsibyala/streamtrust-action#readme).
-
-Use `@v1.0.0` to pin this Action release; `@v1` follows compatible Action updates. The generated HTTP adapter initially tests a bundled demo: adapt it to your application before treating its results as application coverage. Adapters run trusted repository code; use disposable test data and keep secrets out of uploaded reports.
-
-### Published HTTP/SSE demo
-
-StreamTrust uses the published Action in its own CI. This [successful main-branch run](https://github.com/santoshsibyala/streamtrust/actions/runs/42171351265) used Action v1.0.0 and CLI 0.3.0 on Node 22: persistence, cancellation, and retry each passed three repetitions (9 PASS).
-
-[![Published HTTP/SSE demo: StreamTrust Action job summary showing 9 PASS, 0 FAIL, 0 UNSUPPORTED, and 0 HARNESS_ERROR](docs/images/published-action-http-sse-summary.png)](https://github.com/santoshsibyala/streamtrust/actions/runs/42171351265#summary-127739661923)
-
-This run checks the bundled HTTP/SSE teaching demo. The existing CLI, LibreChat, and Vercel AI SDK workflows separately test the package built from the current checkout.
 
 ## CI
 
