@@ -149,6 +149,21 @@ node --import tsx ./node_modules/streamtrust/bin/streamtrust.js verify \
   --adapter ./streamtrust/adapter.ts
 ```
 
+## GitHub Action
+
+Run StreamTrust through the [official composite GitHub Action](https://github.com/santoshsibyala/streamtrust-action):
+
+```yaml
+- uses: santoshsibyala/streamtrust-action@v1
+  with:
+    adapter: ./streamtrust/adapter.mjs
+    node-version: "22"
+```
+
+Check out your repository, install adapter dependencies, and start your test services first. The Action runs the pinned StreamTrust CLI, adds a job summary, and uploads diagnostic reports even when verification fails. By default, failed or unsupported checks and harness errors fail the job. See the [complete workflow, inputs, outputs, and failure policies](https://github.com/santoshsibyala/streamtrust-action#readme).
+
+Use `@v1.0.0` to pin this Action release; `@v1` follows compatible Action updates. The generated HTTP adapter initially tests a bundled demo: adapt it to your application before treating its results as application coverage. Adapters run trusted repository code; use disposable test data and keep secrets out of uploaded reports.
+
 ## CI
 
 Add StreamTrust as a test step in your existing CI. For GitHub Actions, follow these steps:
