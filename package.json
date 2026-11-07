@@ -1,6 +1,6 @@
 {
   "name": "streamtrust",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Adapter-driven CI verification for streaming application lifecycle guarantees",
   "type": "module",
   "license": "MIT",
@@ -39,7 +39,9 @@
     "README.md",
     "LICENSE",
     "examples/nextchat/*.mjs",
-    "examples/nextchat/README.md"
+    "examples/nextchat/README.md",
+    "examples/open-webui/*.mjs",
+    "examples/open-webui/README.md"
   ],
   "scripts": {
     "test": "node --test test/*.test.mjs",
