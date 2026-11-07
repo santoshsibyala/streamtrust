@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What six AI chat apps saved after Stop, Retry, and reload | StreamTrust</title>
+<style>
+*{box-sizing:border-box}body{margin:0;color:#202936;background:#fff;font:1.12rem/1.65 Georgia,serif}main{max-width:46rem;margin:auto;padding:2rem 1.2rem 4rem}h1,h2,th{font-family:system-ui,sans-serif;line-height:1.2}h1{font-size:clamp(2rem,5vw,3rem)}h2{margin-top:2em}a{color:#185388;text-underline-offset:.15em}table{border-collapse:collapse;width:100%;font-size:.94em}td,th{padding:.55em;text-align:left;border-bottom:1px solid #ccd2d6;vertical-align:top}code{font-size:.85em;overflow-wrap:anywhere}pre{background:#f1f4f6;padding:1em;overflow:auto}pre code{overflow-wrap:normal}
+</style></head><body><main><article><h1>What six AI chat apps saved after Stop, Retry, and reload</h1>
+<p>I thought Open WebUI had lost my first message. I was testing it on a fresh database, and the browser timed out waiting for a reply. So I checked where my click on Send had actually gone. A release-notes popup was sitting on top of the button. My message never left the browser. I changed the test to close the popup the way a user would, ran it again, and this time the reply came through.</p>
+<p>That was a useful way to start an investigation into streaming chat. Before I could say an app lost a message, I needed evidence that someone had actually sent it. The same problem came up in less obvious places. Before I could say Retry replaced a failed answer, for example, I needed to know what the app had saved <em>before</em> I clicked Retry.</p>
+<p>On November 6, I exercised six open-source chat apps or examples at pinned revisions. I used StreamTrust to organize repeated checks, Playwright to drive a real browser, and synthetic responses whose text and timing I controlled. I wanted to learn which observations I could carry from one app to the next, and where I needed a different test.</p>
+<h2>Four questions to ask a chat app</h2>
+<p>For <strong>persistence</strong>, I let a reply finish, read the conversation from storage, and reloaded the page. A browser can render the right answer from memory while the database holds an earlier chunk. There’s another way to get a misleading pass here. If the app generates the same answer again on reload, a deterministic provider can return a perfect text match. Where the adapter can count generation requests across the reload, that tells the two cases apart.</p>
+<p>For <strong>Stop</strong>, I waited until the first text appeared while the stream was still open. That gave me a specific moment to look for the control and try it. I could then watch for late text, inspect the saved partial answer, or observe the provider connection closing. Each observation answers a different question. A user can see the text stop moving without knowing whether the server is still working.</p>
+<p>For <strong>regeneration</strong>, I gave successive answers distinguishable text and inspected what happened to the first one. For <strong>error retry</strong>, I introduced a provider failure before asking the app to recover. The order matters. If an error has to survive a page reload, the test has to reload <em>before</em> clicking Retry. Reloading after a successful recovery only tells me where the new answer ended up.</p>
+<h2>What counted as storage</h2>
+<p>I opened fresh browser contexts and followed each app’s own path back to a conversation. For LibreChat I queried disposable MongoDB. For Vercel Chatbot and LobeHub I compared browser observations with PostgreSQL. NextChat kept the active session in the browser, so I read its persisted IndexedDB record. For Open WebUI I used the authenticated saved-chat API that reads the app’s database. The stock assistant-ui example had no durable history adapter to inspect.</p>
+<p>I also had to decide where to control the stream. Holding a local provider connection open let me check a control while the reply was in progress. LobeHub’s fixture worked at the browser transport instead. That was enough to exercise its interface, but the observation ended at the browser. Across apps, I recorded which layer supplied the evidence before interpreting a green result.</p>
+<h2>What happened in each app</h2>
+<p>Each fraction describes repetitions of the check named in that row. Only LibreChat ran the shared evaluator in this investigation.</p>
+<table>
+<thead>
+<tr>
+<th>App and pinned revision</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Vercel Chatbot · <code>a8989b52</code></td>
+<td>Persistence passed 5/5. Stop was unavailable mid-stream 5/5. Edit-and-resend passed 5/5 after completion and 5/5 after a provider error.</td>
+</tr>
+<tr>
+<td>LibreChat · <code>f4154b64</code></td>
+<td>All four shared checks passed, 20/20. These included provider abort on Stop, preserved regeneration branches, and an error visible after reload before Retry.</td>
+</tr>
+<tr>
+<td>NextChat · <code>1d3dc331</code></td>
+<td>All four app-specific checks passed, 20/20. Retry left one replacement answer in the active session. The investigation read the final saved state.</td>
+</tr>
+<tr>
+<td>Open WebUI · <code>c38885a1</code></td>
+<td>After dialog dismissal, all four browser and saved-chat API checks passed, 20/20. The audit checked for saved siblings on regeneration but did not assert which sibling ID reload selected.</td>
+</tr>
+<tr>
+<td>assistant-ui · <code>d9c70b32</code></td>
+<td>In the AI SDK v7 example, Stop, regeneration and retry each passed 5/5 at the UI. Persistence was unsupported in all five attempts.</td>
+</tr>
+<tr>
+<td>LobeHub · <code>ee06a9dc</code></td>
+<td>Persistence, held-stream Stop and regeneration each passed 5/5. Recovery after an HTTP 401 passed 5/5. Recovery from a mid-stream error remained inconclusive.</td>
+</tr>
+</tbody>
+</table>
+<p>I screened a seventh candidate, Chatbot UI, and skipped it. At the time of the audit its last push was in August 2024, and I couldn’t establish current maintenance or acceptance of outside contributions. It contributed no runs to the table.</p>
+<p>The disappearing Vercel Chatbot control was the only confirmed product defect in these runs. A standalone Playwright script held the stream open and reproduced the missing button in five of five attempts without StreamTrust. Earlier contributors had already proposed changing this behavior. My contribution was the newer-revision reproduction, the recording, and a script a maintainer can run independently. <a href="https://github.com/vercel/chatbot/issues/1565">Issue and reproduction</a> · <a href="https://github.com/vercel/chatbot/pull/877">Earlier PR #877</a> · <a href="https://github.com/vercel/chatbot/pull/902">Earlier PR #902</a></p>
+<h2>The test I had to change</h2>
+<p>LibreChat gives regeneration a concrete meaning. The replacement gets a distinct message ID and shares a parent with the original. I can read both saved answers and then reload to see which one the user gets. NextChat intentionally replaces the previous turn in the active session. Requiring it to preserve a sibling would turn a design choice into a failing test.</p>
+<p>My first NextChat adapter made the opposite mistake. It let the first response finish, clicked Retry, then checked for one saved assistant answer containing the second response after reload. It counted two provider calls. All of that could be true even if the first answer had <em>never been saved</em>. I had verified the final state. I had given the check a name broad enough to suggest I’d verified the transition.</p>
+<p>When I packaged the preset, I added a read of the active session immediately before Retry. The report now calls the check <code>regeneration.replace-turn</code>. It requires the completed original to be saved first, then checks that its ID is absent and the replacement survives reload. Its companion, <code>error-retry.replace-turn-same-session</code>, observes the saved partial before Retry. The name tells a reader exactly when recovery happens. Whether the error itself survives a reload before Retry is a separate question. <a href="https://github.com/santoshsibyala/streamtrust/blob/v0.5.0/examples/nextchat/README.md">NextChat preset and contracts</a></p>
+<p>The Open WebUI preset also goes further than the original audit. It checks the original sibling’s content and ID and which replacement is active after reload. On Stop, it observes the mock response close before completion and reads the saved partial. Those assertions belong to the released preset. Applying them retroactively to the investigation would give the original runs credit for observations I never made. <a href="https://github.com/santoshsibyala/streamtrust/blob/v0.5.0/examples/open-webui/README.md">Open WebUI preset and contracts</a></p>
+<h2>Where the evidence ended</h2>
+<p>LobeHub exposed the limits of counting requests. Its automatic retries also contributed to the count after an injected stream error. I couldn’t establish that a durable error existed before the manual retry, so the count couldn’t tell me whether a user action had duplicated a turn. A separate terminal HTTP rejection gave me an observable starting point. I found the assistant error in PostgreSQL, restored the transport, used the native regeneration menu and saw the replacement after reload. That answers the rejected-request question. The interrupted-stream question stays open.</p>
+<p>These were local experiments at one revision per app. Repeating them tells me whether I can reproduce the observation under those conditions. It gives me no estimate of how often someone hits it in production. Likewise, only the checks instrumented to see a provider abort can support a transport claim. Even there, the endpoint was a controlled provider. I didn’t measure cancellation inside a hosted model service.</p>
+<h2>Try one check yourself</h2>
+<p>With Node.js 22 or newer, run the HTTP streaming example in a scratch npm project. It starts with a bundled demo so you can inspect a report before connecting your own application.</p>
+<pre><code class="language-sh">npm install --save-dev --save-exact streamtrust@0.5.0
+npx streamtrust init
+npx streamtrust verify --adapter ./streamtrust/adapter.mjs
+</code></pre>
+<p>The available presets are <code>http</code>, <code>librechat</code>, <code>vercel-ai</code>, <code>nextchat</code> and <code>open-webui</code>. Use <code>npx streamtrust init &lt;directory&gt; --preset &lt;preset&gt;</code> to select one. NextChat and Open WebUI also accept the short form, for example <code>npx streamtrust init nextchat</code>. Follow the preset’s setup steps for its browser, runtime and test services. The Vercel AI SDK preset runs a minimal reference app. The Vercel Chatbot reproduction is in the upstream issue. <a href="https://github.com/santoshsibyala/streamtrust">StreamTrust and setup guides</a></p>
+<p>Once your workflow checks out your adapter and prepares its dependencies and services, add this step. It writes the outcomes to the job summary and uploads the reports. <a href="https://github.com/marketplace/actions/streamtrust-ci-verifier">StreamTrust CI Verifier</a></p>
+<pre><code class="language-yaml">- uses: santoshsibyala/streamtrust-action@v1
+  with:
+    adapter: ./streamtrust/adapter.mjs
+    node-version: '22'
+</code></pre>
+<p>If you want to try one of these checks on your own app, start with Retry. Let the first answer finish, look at what got saved, then hit Retry and reload the page. Can you still get back to the first answer, or did the second one replace it? Either one can be fine. What matters is checking what’s saved <em>before</em> you click. That was the step my NextChat test was missing.</p>
+</article></main></body></html>
