@@ -267,3 +267,19 @@ test('presets are listed by name and copied recursively with rollback on conflic
     await rm(cwd, { recursive: true, force: true });
   }
 });
+
+test('NextChat shorthand and explicit preset scaffold the same adapter', async () => {
+  const cwd = await mkdtemp(join(tmpdir(), 'streamtrust-nextchat-'));
+  try {
+    assert.equal((await run(['init', 'nextchat'], cwd)).code, 0);
+    assert.equal((await run(['init', 'custom', '--preset', 'nextchat'], cwd)).code, 0);
+    for (const file of ['adapter.mjs', 'provider.mjs', 'README.md']) {
+      const expected = await readFile(new URL('../examples/nextchat/' + file, import.meta.url));
+      for (const dir of ['nextchat', 'custom'])
+        assert.deepEqual(await readFile(join(cwd, dir, file)), expected);
+    }
+    assert.equal((await run(['init', 'nextchat'], cwd)).code, 2);
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+  }
+});

@@ -4,11 +4,11 @@ This preset runs a **minimal Next.js chat built on the AI SDK** (`ai`, `@ai-sdk/
 
 ## Quick start (no API key)
 
-Use Node.js 22 or newer (AI SDK 7 requires it). This preset is available in StreamTrust 0.3.0. In a separate verification project:
+Use Node.js 22 or newer (AI SDK 7 requires it). This preset has been available since StreamTrust 0.3.0. In a separate verification project:
 
 ```sh
 npm init -y
-npm install --save-dev --save-exact streamtrust@0.3.0 playwright@1.64.1
+npm install --save-dev --save-exact streamtrust@0.4.0 playwright@1.64.1
 npx playwright install chromium
 npx streamtrust init streamtrust-vercel-ai --preset vercel-ai
 node streamtrust-vercel-ai/setup.mjs
@@ -102,7 +102,7 @@ To use the published GitHub Action, keep the checkout, dependency installation, 
   uses: santoshsibyala/streamtrust-action@v1
   with:
     adapter: streamtrust-vercel-ai/adapter.mjs
-    version: '0.3.0'
+    version: '0.4.0'
     node-version: '22'
     output: reports/vercel-ai
     repetitions: '3'
