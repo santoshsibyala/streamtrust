@@ -10,7 +10,7 @@ StreamTrust is a CI check for streaming applications such as AI chat. Its reusab
 - **Repeated runs.** Each scenario runs N times and the report shows every repetition, because cancellation and retry bugs are often intermittent.
 - **Your contract, written down.** An adapter implements your app's start, stream, cancel, retry and saved-state operations; StreamTrust invokes the adapter scenarios and writes JSON, JUnit, Markdown and HTML reports.
 
-**Status:** `0.4.0`, an early 0.x release for independent teams. APIs and report formats may change before 1.0. The CLI is dependency-free, ESM, and requires Node.js 22+. MIT licensed. Browser and database libraries belong to your adapter and are not installed by StreamTrust.
+**Status:** `0.5.0`, an early 0.x release for independent teams. APIs and report formats may change before 1.0. The CLI is dependency-free, ESM, and requires Node.js 22+. MIT licensed. Browser and database libraries belong to your adapter and are not installed by StreamTrust.
 
 ## Watch the 66-second demo
 
@@ -28,7 +28,7 @@ npx streamtrust init
 npx streamtrust verify --adapter ./streamtrust/adapter.mjs
 ```
 
-For reproducible CI, pin `streamtrust@0.4.0` and commit your lockfile. The generated adapter initially exercises the bundled demonstration; map it to your application before using its results as application evidence.
+For reproducible CI, pin `streamtrust@0.5.0` and commit your lockfile. The generated adapter initially exercises the bundled demonstration; map it to your application before using its results as application evidence.
 
 ## GitHub Action
 
@@ -70,6 +70,10 @@ A `vercel-ai` preset runs a minimal Next.js chat built on the AI SDK (`useChat`,
 
 Run `npx streamtrust init nextchat` to generate a Playwright adapter for a separate pinned NextChat checkout. It checks saved replies, Stop, regeneration and retry after a provider disconnect against the chat history stored in the browser. The local provider needs no model key. See the [NextChat setup and CI guide](examples/nextchat/README.md) and [integration workflow](.github/workflows/nextchat.yml).
 
+## Open WebUI integration
+
+Generate the Open WebUI preset with `npx streamtrust init open-webui`. The adapter starts a disposable upstream container, drives chat through a browser and compares results with the saved-chat API. The [setup and CI guide](examples/open-webui/README.md) lists the contract for each report scenario.
+
 ## Run from source
 
 ```sh
@@ -88,7 +92,7 @@ Build the tarball with `npm pack` in this repository.
 Put the supplied tarball in your project's `vendor/` directory, then:
 
 ```sh
-npm install --save-dev ./vendor/streamtrust-0.4.0.tgz
+npm install --save-dev ./vendor/streamtrust-0.5.0.tgz
 npx streamtrust init
 npx streamtrust verify --adapter ./streamtrust/adapter.mjs
 ```
@@ -184,7 +188,7 @@ Add StreamTrust as a test step in your existing CI. For GitHub Actions, follow t
 1. Install StreamTrust and create the starting adapter:
 
    ```sh
-   npm install --save-dev --save-exact streamtrust@0.4.0
+   npm install --save-dev --save-exact streamtrust@0.5.0
    npx streamtrust init
    ```
 

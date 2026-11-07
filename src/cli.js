@@ -19,13 +19,15 @@ const PRESETS = {
     'reference-app/app/api/chat/route.js', 'reference-app/app/chat/[id]/chat.jsx',
     'reference-app/app/chat/[id]/page.jsx',
   ].map((name) => [`vercel-ai/${name}`, name]),
+  'open-webui': ['adapter.mjs', 'provider.mjs', 'README.md'].map(
+    (name) => [`open-webui/${name}`, name]),
   nextchat: ['adapter.mjs', 'provider.mjs', 'README.md'].map(
     (name) => [`nextchat/${name}`, name]),
 };
 export function presets() { return Object.keys(PRESETS); }
 function presetFiles(preset) { return PRESETS[preset]; }
 const HELP = () =>
-  `StreamTrust ${VERSION}\n\nUsage:\n  streamtrust init [directory] [--preset <name>]\n  streamtrust init nextchat\n  streamtrust verify --adapter ./streamtrust/adapter.mjs [options]\n\nOptions:\n  --output <directory>    Reports (default: reports/streamtrust)\n  --repetitions <1-1000>   Repetitions per scenario (default: 3)\n  --timeout-ms <integer>  Total run deadline including setup/cleanup (default: 300000)\n  --help                 Show help\n  --version              Show version\n\nPresets: ${presets().join(', ')} (default: http)\n\nExit codes: 0 all pass; 1 failed/unsupported checks; 2 setup, timeout or harness error.\nAdapters execute trusted local code. JavaScript ESM (.mjs) works without dependencies.\n`;
+  `StreamTrust ${VERSION}\n\nUsage:\n  streamtrust init [directory] [--preset <name>]\n  streamtrust init nextchat|open-webui\n  streamtrust verify --adapter ./streamtrust/adapter.mjs [options]\n\nOptions:\n  --output <directory>    Reports (default: reports/streamtrust)\n  --repetitions <1-1000>   Repetitions per scenario (default: 3)\n  --timeout-ms <integer>  Total run deadline including setup/cleanup (default: 300000)\n  --help                 Show help\n  --version              Show version\n\nPresets: ${presets().join(', ')} (default: http)\n\nExit codes: 0 all pass; 1 failed/unsupported checks; 2 setup, timeout or harness error.\nAdapters execute trusted local code. JavaScript ESM (.mjs) works without dependencies.\n`;
 export async function main(args) {
   let outputDir;
   try {
@@ -40,7 +42,7 @@ export async function main(args) {
     if (args[0] === 'init') {
       const initArgs = args.slice(1);
       const presetIndex = initArgs.indexOf('--preset');
-      let preset = initArgs.length === 1 && initArgs[0] === 'nextchat' ? 'nextchat' : 'http';
+      let preset = initArgs.length === 1 && ['nextchat', 'open-webui'].includes(initArgs[0]) ? initArgs[0] : 'http';
       if (presetIndex !== -1) {
         preset = initArgs[presetIndex + 1];
         initArgs.splice(presetIndex, 2);
