@@ -118,7 +118,12 @@ async function create() {
       browser: browser.version(),
       commit,
     }),
-    scenarios: ["persistence", "cancellation", "regeneration", "error-retry"],
+    scenarios: [
+      "persistence",
+      "cancellation",
+      "regeneration.replace-turn",
+      "error-retry.replace-turn-same-session",
+    ],
     close,
     async run(scenario, { repetition }) {
       const context = await browser.newContext({ locale: "en-US" }),
@@ -159,6 +164,11 @@ async function create() {
           ).state;
           return state?.sessions[state.currentSessionIndex]?.messages || [];
         });
+      const regenerate = scenario === "regeneration.replace-turn";
+      const retryError = scenario === "error-retry.replace-turn-same-session";
+      const retry = regenerate || retryError;
+      let original;
+      const evidence = {};
       const checks = [];
       const check = (name, passed) => checks.push({ name, passed: !!passed });
       try {
@@ -189,22 +199,47 @@ async function create() {
             10000,
           );
           if (!c.closed) c.finish();
-        } else if (scenario === "error-retry") {
+        } else if (retryError) {
           c.error();
         } else {
           c.finish();
         }
-        if (["regeneration", "error-retry"].includes(scenario)) {
+        if (retry) {
+          if (regenerate)
+            await until(
+              async () => (await text()).includes(c.prefix + c.suffix),
+              "first answer complete",
+            );
+          await page
+            .getByText("Stop", { exact: true })
+            .last()
+            .waitFor({ state: "hidden" });
           await page
             .locator('[class*="chat-message"]')
             .filter({ hasText: c.prefix })
             .last()
             .hover();
-          await page
+          const retryButton = page
             .getByText("Retry", { exact: true })
             .last()
-            .locator("..")
-            .click();
+            .locator("..");
+          await retryButton.waitFor({ state: "visible" });
+          const assistants = (await read()).filter(
+            (m) => m.role === "assistant",
+          );
+          original = assistants[0];
+          evidence.originalSavedBeforeRetry =
+            assistants.length === 1 &&
+            typeof original.id === "string" &&
+            original.id.length > 0 &&
+            (regenerate
+              ? original.content === c.prefix + c.suffix &&
+                original.streaming === false
+              : typeof original.content === "string" &&
+                original.content.startsWith(c.prefix) &&
+                !original.content.includes(c.suffix));
+          check("originalSavedBeforeRetry", evidence.originalSavedBeforeRetry);
+          await retryButton.click();
           await until(() => calls().length === 2, "second provider call");
           c = calls()[1];
           c.send(c.prefix);
@@ -241,23 +276,21 @@ async function create() {
           "Reload shows expected answer",
           (await text()).includes(expected),
         );
-        check(
-          "No extra provider call",
-          calls().length ===
-            (scenario === "regeneration" || scenario === "error-retry" ? 2 : 1),
-        );
+        check("No extra provider call", calls().length === (retry ? 2 : 1));
         if (scenario === "cancellation")
           check(
             "No late completion displayed",
             !(await text()).includes(c.suffix),
           );
-        return {
-          checks,
-          evidence: {
-            assistantRows: saved.length,
-            providerCalls: calls().length,
-          },
-        };
+        if (retry) {
+          evidence.originalAbsentAfterReload =
+            !!original?.id && saved.every((m) => m.id !== original.id);
+          check(
+            "originalAbsentAfterReload",
+            evidence.originalAbsentAfterReload,
+          );
+        }
+        return { checks, evidence };
       } catch (error) {
         if (process.env.STREAMTRUST_NEXTCHAT_DEBUG === "1")
           console.error(error);

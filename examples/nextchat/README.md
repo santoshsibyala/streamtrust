@@ -26,10 +26,12 @@ Use a dedicated checkout with clean tracked files and no development dotenv file
 |---|---|
 | Persistence | One assistant answer matches the complete provider response, with one generation. |
 | Cancellation | Clicking Stop after the first chunk preserves only the partial answer. Late completion text stays absent even if the provider can finish. |
-| Regeneration | After successful completion, the native Retry action generates a replacement. Exactly one assistant answer remains, containing the second response. |
-| Error retry | After the provider disconnects mid-stream, Retry generates a replacement that survives reload. |
+| `regeneration.replace-turn` | Before Retry, the completed first answer is saved. After reload, the original assistant ID is absent and the sole assistant answer matches the second response. |
+| `error-retry.replace-turn-same-session` | After a mid-stream disconnect, the first partial answer is saved before Retry. The replacement survives reload and the original assistant ID is absent. |
 
-The adapter reads the selected session in the persisted Zustand record `chat-next-web-store` (IndexedDB database `keyval-store`, object store `keyval`; NextChat also supports localStorage fallback). It compares assistant text from storage with the rendered page and counts streaming provider calls. This tests browser-local persistence in one session. The Stop check covers visible and saved output. It does not establish server-side cancellation. The retry check covers recovery in the same session, without requiring a durable error flag or sibling branches. Reports contain fixed check names, booleans and counts. A changed selector or unreadable storage can produce a harness error.
+NextChat intentionally replaces the previous turn on Retry, so these NextChat-specific checks verify replacement in the active session; the shared evaluator checks branch preservation on regeneration and a saved error visible after reload before retry.
+
+The adapter reads the selected session in the persisted Zustand record `chat-next-web-store` (IndexedDB database `keyval-store`, object store `keyval`; NextChat also supports localStorage fallback). It compares assistant text from storage with the rendered page and counts streaming provider calls. This tests browser-local persistence in one session. The Stop check covers visible and saved output. It does not establish server-side cancellation. The retry check covers recovery in the same session, without requiring a durable error flag or sibling branches. The pre-Retry read checks partial text for error retry. Whether a failure flag survives a reload before Retry is outside this scenario. Per-run evidence contains only booleans. Message text and IDs stay in memory. A changed selector or unreadable storage can produce a harness error.
 
 ## Run in CI
 
