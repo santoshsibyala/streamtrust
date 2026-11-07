@@ -6,6 +6,8 @@
 
 StreamTrust is a CI check for streaming applications such as AI chat. Its reusable checks compare what was displayed with what the application authoritatively saved and report disagreements as failed checks. It does not replace Playwright: Playwright drives the browser, and the bundled presets use it inside their adapters.
 
+[Read the six-app study: What six AI chat apps saved after Stop, Retry, and reload](https://santoshsibyala.github.io/streamtrust/blog/six-chat-apps/)
+
 - **Three outcomes, kept apart.** "The app failed" (FAIL), "this capability is not supported" (UNSUPPORTED) and "we could not determine whether it failed" (HARNESS_ERROR) are reported separately, and harness errors exit with their own code.
 - **Repeated runs.** Each scenario runs N times and the report shows every repetition, because cancellation and retry bugs are often intermittent.
 - **Your contract, written down.** An adapter implements your app's start, stream, cancel, retry and saved-state operations; StreamTrust invokes the adapter scenarios and writes JSON, JUnit, Markdown and HTML reports.
