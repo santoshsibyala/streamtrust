@@ -10,7 +10,7 @@ StreamTrust is a CI check for streaming applications such as AI chat. Its reusab
 - **Repeated runs.** Each scenario runs N times and the report shows every repetition, because cancellation and retry bugs are often intermittent.
 - **Your contract, written down.** An adapter implements your app's start, stream, cancel, retry and saved-state operations; StreamTrust invokes the adapter scenarios and writes JSON, JUnit, Markdown and HTML reports.
 
-**Status:** `0.3.0`, an early 0.x release for independent teams. APIs and report formats may change before 1.0. The CLI is dependency-free, ESM, and requires Node.js 22+. MIT licensed. Browser and database libraries belong to your adapter and are not installed by StreamTrust.
+**Status:** `0.4.0`, an early 0.x release for independent teams. APIs and report formats may change before 1.0. The CLI is dependency-free, ESM, and requires Node.js 22+. MIT licensed. Browser and database libraries belong to your adapter and are not installed by StreamTrust.
 
 ## Watch the 66-second demo
 
@@ -28,7 +28,7 @@ npx streamtrust init
 npx streamtrust verify --adapter ./streamtrust/adapter.mjs
 ```
 
-For reproducible CI, pin `streamtrust@0.3.0` and commit your lockfile. The generated adapter initially exercises the bundled demonstration; map it to your application before using its results as application evidence.
+For reproducible CI, pin `streamtrust@0.4.0` and commit your lockfile. The generated adapter initially exercises the bundled demonstration; map it to your application before using its results as application evidence.
 
 ## GitHub Action
 
@@ -52,7 +52,7 @@ StreamTrust uses the published Action in its own CI. This [successful main-branc
 
 [![Published HTTP/SSE demo: StreamTrust Action job summary showing 9 PASS, 0 FAIL, 0 UNSUPPORTED, and 0 HARNESS_ERROR](docs/images/published-action-http-sse-summary.png)](https://github.com/santoshsibyala/streamtrust/actions/runs/42171351265#summary-127739661923)
 
-This run checks the bundled HTTP/SSE teaching demo. The existing CLI, LibreChat, and Vercel AI SDK workflows separately test the package built from the current checkout.
+This run checks the bundled HTTP/SSE teaching demo. The existing CLI, LibreChat, NextChat, and Vercel AI SDK workflows separately test the package built from the current checkout.
 
 ## LibreChat integration
 
@@ -64,7 +64,11 @@ A LibreChat preset now exercises persistence, native Stop, regeneration and erro
 
 A `vercel-ai` preset runs a minimal Next.js chat built on the AI SDK (`useChat`, `streamText`) in production mode with a synthetic OpenAI-compatible provider, so it needs no API key. It covers the same four scenarios through the browser and the app's saved state, and can be pointed at your own built AI SDK app after you adjust its selectors and saved-state read. It is not an official Vercel integration.
 
-**Available in StreamTrust 0.3.0.** Install from npm and generate it with `npx streamtrust init streamtrust-vercel-ai --preset vercel-ai`. See the [Vercel AI SDK quick start](examples/vercel-ai/README.md) for what it does and does not verify. It requires Node 22+ and Playwright in your verification project. An [integration workflow](.github/workflows/vercel-ai.yml) exercises the packed CLI against the reference app.
+**Available since StreamTrust 0.3.0.** Install from npm and generate it with `npx streamtrust init streamtrust-vercel-ai --preset vercel-ai`. See the [Vercel AI SDK quick start](examples/vercel-ai/README.md) for what it does and does not verify. It requires Node 22+ and Playwright in your verification project. An [integration workflow](.github/workflows/vercel-ai.yml) exercises the packed CLI against the reference app.
+
+## NextChat integration
+
+Run `npx streamtrust init nextchat` to generate a Playwright adapter for a separate pinned NextChat checkout. It checks saved replies, Stop, regeneration and retry after a provider disconnect against the chat history stored in the browser. The local provider needs no model key. See the [NextChat setup and CI guide](examples/nextchat/README.md) and [integration workflow](.github/workflows/nextchat.yml).
 
 ## Run from source
 
@@ -84,7 +88,7 @@ Build the tarball with `npm pack` in this repository.
 Put the supplied tarball in your project's `vendor/` directory, then:
 
 ```sh
-npm install --save-dev ./vendor/streamtrust-0.3.0.tgz
+npm install --save-dev ./vendor/streamtrust-0.4.0.tgz
 npx streamtrust init
 npx streamtrust verify --adapter ./streamtrust/adapter.mjs
 ```
@@ -180,7 +184,7 @@ Add StreamTrust as a test step in your existing CI. For GitHub Actions, follow t
 1. Install StreamTrust and create the starting adapter:
 
    ```sh
-   npm install --save-dev --save-exact streamtrust@0.3.0
+   npm install --save-dev --save-exact streamtrust@0.4.0
    npx streamtrust init
    ```
 

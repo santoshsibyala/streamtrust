@@ -4,11 +4,11 @@ This preset runs a **built local LibreChat checkout**, native browser UI and rea
 
 ## Installation
 
-Use Node.js 24 and npm 11. In a separate verification project, install StreamTrust 0.3.0 from npm:
+Use Node.js 24 and npm 11. In a separate verification project, install StreamTrust 0.4.0 from npm:
 
 ```sh
 npm init -y
-npm install --save-dev --save-exact streamtrust@0.3.0
+npm install --save-dev --save-exact streamtrust@0.4.0
 npm install --save-dev --save-exact playwright@1.64.1 mongodb@6.20.0 mongodb-memory-server@11.3.0
 npx playwright install chromium
 npx streamtrust init streamtrust-librechat --preset librechat
@@ -83,7 +83,7 @@ To use the published GitHub Action, keep the checkout, dependency installation, 
   uses: santoshsibyala/streamtrust-action@v1
   with:
     adapter: streamtrust-librechat/adapter.mjs
-    version: '0.3.0'
+    version: '0.4.0'
     node-version: '24'
     output: reports/librechat
     repetitions: '3'

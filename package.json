@@ -1,6 +1,6 @@
 {
   "name": "streamtrust",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Adapter-driven CI verification for streaming application lifecycle guarantees",
   "type": "module",
   "license": "MIT",
@@ -37,7 +37,9 @@
     "examples/vercel-ai/reference-app/app/**/*.js",
     "examples/vercel-ai/reference-app/app/**/*.jsx",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "examples/nextchat/*.mjs",
+    "examples/nextchat/README.md"
   ],
   "scripts": {
     "test": "node --test test/*.test.mjs",
@@ -48,7 +50,14 @@
     "streaming",
     "verification",
     "testing",
-    "sse"
+    "sse",
+    "github-action",
+    "ai",
+    "llm",
+    "chat",
+    "playwright",
+    "librechat",
+    "vercel-ai-sdk"
   ],
   "repository": {
     "type": "git",
