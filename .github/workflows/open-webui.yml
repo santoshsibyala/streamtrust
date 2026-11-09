@@ -29,9 +29,9 @@ jobs:
           mkdir "$RUNNER_TEMP/consumer"
           cd "$RUNNER_TEMP/consumer"
           npm init -y
-          npm install --save-dev "$RUNNER_TEMP/streamtrust-$(node -p "require('$GITHUB_WORKSPACE/package.json').version").tgz" playwright@1.64.1
-          npx --no-install playwright install --with-deps chromium
+          npm install --save-dev "$RUNNER_TEMP/streamtrust-$(node -p "require('$GITHUB_WORKSPACE/package.json').version").tgz"
           npx --no-install streamtrust init open-webui
+          (cd open-webui && npm install && npx playwright install --with-deps chromium)
       - name: Start Open WebUI, wait for HTTP readiness, and verify all four scenarios
         working-directory: ${{ runner.temp }}/consumer
         run: npx --no-install streamtrust verify --adapter open-webui/adapter.mjs --output reports/open-webui --repetitions 3 --timeout-ms 900000

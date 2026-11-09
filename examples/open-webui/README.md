@@ -4,13 +4,13 @@ The adapter drives a disposable Open WebUI v0.13.0 instance with Playwright and 
 
 ## Setup
 
-Install Node 22+, Docker and Playwright. Start Docker before running the verifier. From a verification project, once the CLI release is available:
+Install Node 22+ and Docker. Start Docker before running the verifier. From a verification project, once the CLI release is available:
 
 ```sh
-npm install --save-dev --save-exact streamtrust@0.6.0 playwright@1.64.1
-npx playwright install chromium
+npm install --save-dev --save-exact streamtrust@0.6.1
 npx streamtrust init open-webui
-npx streamtrust verify --adapter open-webui/adapter.mjs --output reports/open-webui --repetitions 3 --timeout-ms 900000
+(cd open-webui && npm install && npx playwright install --with-deps chromium)
+npx streamtrust@0.6.1 verify --adapter open-webui/adapter.mjs --repetitions 3 --timeout-ms 900000
 ```
 
 Use `init <directory> --preset open-webui` to choose a directory. The adapter publishes the app on a randomly assigned loopback port, waits for health, signs into a runtime-generated admin account, and dismisses the first-launch release dialog. Each scenario uses a fresh browser context and a new chat. The container data directory lives in tmpfs and is removed on cleanup. The app connects to a mock on the Docker bridge gateway on native Linux or through Docker Desktop host routing on macOS. The provider requires a disposable bearer key.
@@ -46,12 +46,12 @@ Set `STREAMTRUST_OPEN_WEBUI_REF` to the full lowercase checkout SHA on the verif
 
 ## Run in CI
 
-Commit the generated adapter and consumer lockfile. On an Ubuntu Docker runner, after checkout, Node setup, `npm ci` and `npx playwright install --with-deps chromium`, use the [StreamTrust Action](https://github.com/santoshsibyala/streamtrust-action):
+Commit the generated adapter and consumer lockfile. On an Ubuntu Docker runner, after checkout, Node setup, `npm ci` and `(cd open-webui && npm ci && npx playwright install --with-deps chromium)`, use the [StreamTrust Action](https://github.com/santoshsibyala/streamtrust-action):
 
 ```yaml
 - uses: santoshsibyala/streamtrust-action@v1
   with:
-    version: '0.6.0'
+    version: '0.6.1'
     adapter: open-webui/adapter.mjs
     repetitions: '3'
     timeout-ms: '900000'

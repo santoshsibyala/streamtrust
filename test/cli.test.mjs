@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
-import { mkdtemp, mkdir, readFile, writeFile, rm } from 'node:fs/promises';
+import { mkdtemp, mkdir, realpath, readFile, writeFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { resolve, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -282,4 +282,45 @@ test('NextChat shorthand and explicit preset scaffold the same adapter', async (
   } finally {
     await rm(cwd, { recursive: true, force: true });
   }
+});
+
+test('browser scaffolds declare tested dependencies and respect an existing manifest', async t => {
+  const cwd = await mkdtemp(join(tmpdir(), 'streamtrust-manifest-'));
+  t.after(() => rm(cwd, {recursive: true, force: true}));
+  for (const preset of ['nextchat', 'open-webui', 'librechat', 'vercel-ai', 'http']) {
+    const init = await run(['init', preset, '--preset', preset], cwd);
+    assert.equal(init.code, 0, init.text);
+    const manifest = readFile(join(cwd, preset, 'package.json'), 'utf8');
+    if (preset === 'http') {
+      await assert.rejects(manifest, {code: 'ENOENT'});
+      assert.doesNotMatch(init.text, /playwright install/);
+    } else {
+      const pkg = JSON.parse(await manifest);
+      assert.equal(pkg.private, true);
+      assert.equal(pkg.dependencies.playwright, '1.64.1');
+      assert.match(init.text, /npm install && npx playwright install --with-deps chromium/);
+    }
+  }
+  const original = '{"name":"existing","private":true}';
+  await writeFile(join(cwd, 'package.json'), original);
+  const init = await run(['init', '.', '--preset', 'nextchat'], cwd);
+  assert.equal(init.code, 0, init.text);
+  assert.match(init.text, /npm install --save-exact playwright@1.64.1/);
+  assert.equal(await readFile(join(cwd, 'package.json'), 'utf8'), original);
+});
+
+test('missing playwright gives a folder-specific recovery command only for that package', async t => {
+  const cwd = await mkdtemp(join(tmpdir(), 'streamtrust-missing-'));
+  t.after(() => rm(cwd, {recursive: true, force: true}));
+  await run(['init', 'nextchat'], cwd);
+  const args = ['verify', '--adapter', 'nextchat/adapter.mjs'];
+  const result = await run(args, cwd);
+  assert.equal(result.code, 2);
+  assert.ok(result.text.includes("Missing package 'playwright'"));
+  assert.ok(result.text.includes("(cd '" + await realpath(join(cwd, 'nextchat')) + "' && npm install && npx playwright install --with-deps chromium)"));
+  const report = () => readFile(join(cwd, 'reports/streamtrust/report.json'), 'utf8').then(JSON.parse);
+  assert.match((await report()).suiteErrors[0], /Missing package 'playwright'/);
+  await writeFile(join(cwd, 'nextchat/adapter.mjs'), "import 'playwright-other';");
+  assert.equal((await run(args, cwd)).code, 2);
+  assert.match((await report()).suiteErrors[0], /ERR_MODULE_NOT_FOUND.*'playwright-other'/);
 });

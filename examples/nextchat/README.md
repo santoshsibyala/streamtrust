@@ -8,15 +8,17 @@ In a verification project with Node 22 (the install command selects Yarn Classic
 
 ```sh
 npm init -y
-npm install --save-dev --save-exact streamtrust@0.6.0 playwright@1.64.1
-npx playwright install chromium
+npm install --save-dev --save-exact streamtrust@0.6.1
 npx streamtrust init nextchat
+(cd nextchat && npm install && npx playwright install --with-deps chromium)
 export STREAMTRUST_NEXTCHAT_ROOT="$PWD/.cache/NextChat"
 git clone https://github.com/ChatGPTNextWeb/NextChat.git "$STREAMTRUST_NEXTCHAT_ROOT"
 git -C "$STREAMTRUST_NEXTCHAT_ROOT" checkout --detach 1d3dc331512929a4b1d3e82354e72acce33b5c7a
 (cd "$STREAMTRUST_NEXTCHAT_ROOT" && npx --yes --package=yarn@1.22.22 -- yarn install --frozen-lockfile --ignore-scripts)
-npx streamtrust verify --adapter nextchat/adapter.mjs --output reports/nextchat --repetitions 3 --timeout-ms 900000
+npx streamtrust@0.6.1 verify --adapter nextchat/adapter.mjs --repetitions 3 --timeout-ms 900000
 ```
+
+Run only one verifier per NextChat checkout at a time. Concurrent dev servers write to the same `.next` build directory and can lose compiled chunks.
 
 Use a dedicated checkout with clean tracked files and no development dotenv files. The adapter starts NextChat in development mode on loopback, waits for HTTP readiness, and closes the app, provider and browser after verification. Requests use a synthetic key. Each repetition starts in a fresh browser context. To choose another output directory for the template, use `streamtrust init <directory> --preset nextchat`. To use installed Chrome, set `STREAMTRUST_BROWSER_CHANNEL=chrome`.
 
@@ -49,14 +51,14 @@ Use the SHA actually checked out (PR workflows commonly check out a merge commit
 
 ## Run in CI
 
-After installing the locked consumer dependencies, installing Chromium, and preparing the pinned checkout above, export `STREAMTRUST_NEXTCHAT_ROOT` for the job. Commit the generated adapter and helper. Use the [StreamTrust Action](https://github.com/santoshsibyala/streamtrust-action):
+After installing the consumer dependencies and running `(cd nextchat && npm ci && npx playwright install --with-deps chromium)`, and preparing the pinned checkout above, export `STREAMTRUST_NEXTCHAT_ROOT` for the job. Commit the generated adapter and helper. Use the [StreamTrust Action](https://github.com/santoshsibyala/streamtrust-action):
 
 ```yaml
 - name: Verify NextChat
   uses: santoshsibyala/streamtrust-action@v1
   with:
     adapter: nextchat/adapter.mjs
-    version: '0.6.0'
+    version: '0.6.1'
     node-version: '22'
     repetitions: '3'
     timeout-ms: '900000'

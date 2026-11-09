@@ -9,6 +9,7 @@ import { readFile, writeFile } from 'node:fs/promises';
 import { resolve, dirname } from 'node:path';
 import { createHash, randomBytes } from 'node:crypto';
 
+import { chromium } from 'playwright';
 import { startProvider } from './provider.mjs';
 
 const PIN = 'a378657583567310c841d652b0f6b00c83e2bd6b';
@@ -63,8 +64,7 @@ async function createAdapter() {
     }).trim();
   if ((expectedCommit !== 'current' && commit !== expectedCommit) || dirty())
     throw new Error('Expected clean pinned LibreChat checkout');
-  const require = createRequire(resolve(process.cwd(), 'package.json'));
-  const { chromium } = require('playwright');
+  const require = createRequire(import.meta.url);
   const { MongoMemoryServer } = require('mongodb-memory-server');
   const { MongoClient } = require('mongodb');
   const cleanups = [];
