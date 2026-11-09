@@ -35,9 +35,9 @@ async function createAdapter() {
     )
   )
     throw new Error('Use an isolated checkout without environment files');
-  const expectedCommit = process.env.STREAMTRUST_LIBRECHAT_COMMIT || PIN;
-  if (!/^[a-f0-9]{40}$/.test(expectedCommit))
-    throw new Error('Expected commit must be a full Git SHA');
+  const expectedCommit = process.env.STREAMTRUST_LIBRECHAT_COMMIT ?? PIN;
+  if (expectedCommit !== 'current' && !/^[a-f0-9]{40}$/.test(expectedCommit))
+    throw new Error('Expected commit must be a full Git SHA or current');
   const configPort = Number(process.env.STREAMTRUST_LIBRECHAT_PORT || 0);
   if (!Number.isInteger(configPort) || configPort < 0 || configPort > 65535)
     throw new Error('Invalid LibreChat port');
@@ -61,7 +61,7 @@ async function createAdapter() {
       cwd: root,
       encoding: 'utf8',
     }).trim();
-  if (commit !== expectedCommit || dirty())
+  if ((expectedCommit !== 'current' && commit !== expectedCommit) || dirty())
     throw new Error('Expected clean pinned LibreChat checkout');
   const require = createRequire(resolve(process.cwd(), 'package.json'));
   const { chromium } = require('playwright');

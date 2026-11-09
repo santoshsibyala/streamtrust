@@ -7,7 +7,7 @@ The adapter drives a disposable Open WebUI v0.13.0 instance with Playwright and 
 Install Node 22+, Docker and Playwright. Start Docker before running the verifier. From a verification project, once the CLI release is available:
 
 ```sh
-npm install --save-dev --save-exact streamtrust@0.5.0 playwright@1.64.1
+npm install --save-dev --save-exact streamtrust@0.6.0 playwright@1.64.1
 npx playwright install chromium
 npx streamtrust init open-webui
 npx streamtrust verify --adapter open-webui/adapter.mjs --output reports/open-webui --repetitions 3 --timeout-ms 900000
@@ -21,12 +21,28 @@ The adapter reads the authenticated saved-chat API (`GET /api/v1/chats/{id}`) ba
 
 | Report scenario | What a pass requires |
 |---|---|
-| `persistence.shared` | Shared evaluator: one matching complete, error-free answer, visible before and after reload, with no new generation on reload. The active saved record must match. |
+| `persistence` | Shared evaluator: one matching complete, error-free answer, visible before and after reload, with no new generation on reload. The active saved record must match. |
 | `cancellation.provider-abort-saved-partial` | App-specific: after native Stop, the mock sees its open HTTP response close before completion. The partial answer stays active and saved after reload, no late suffix appears, and generation count stays at one. Open WebUI can mark a stopped message done. |
-| `regeneration.shared-active-sibling` | Shared evaluator plus active selection: the completed original is saved before Regenerate. The original content and ID survive, the replacement has a distinct ID and the same parent, and reload selects the replacement. |
-| `error-retry.shared-saved-visible` | Shared evaluator plus active selection: a synthetic SSE provider error is saved and visible after reload before Regenerate. The replacement is active in storage and visible after a second reload. |
+| `regeneration` | Shared evaluator plus active selection: the completed original is saved before Regenerate. The original content and ID survive, the replacement has a distinct ID and the same parent, and reload selects the replacement. |
+| `error-retry` | Shared evaluator plus active selection: a synthetic SSE provider error is saved and visible after reload before Regenerate. The replacement is active in storage and visible after a second reload. |
 
 An unavailable required storage field produces UNSUPPORTED where the adapter cannot establish the contract. Runtime or selector errors produce harness errors. Shareable evidence includes booleans and counts. Only the synthetic text-error fixture and the pinned app’s single-user chat lifecycle are in scope.
+
+## Running in your own CI
+
+With no overrides the preset uses the published digest and revision above. To test your CI checkout, first build its upstream image using your normal build process. Label the image with `--label "org.opencontainers.image.revision=$(git rev-parse HEAD)"` and export its immutable image ID, for example:
+
+```sh
+echo "STREAMTRUST_OPEN_WEBUI_IMAGE=$(docker image inspect --format '{{.Id}}' open-webui:ci)" >> "$GITHUB_ENV"
+```
+
+Set `STREAMTRUST_OPEN_WEBUI_REF` to the full lowercase checkout SHA on the verification step, or use `current` with `STREAMTRUST_OPEN_WEBUI_ROOT` pointing to the checkout (defaults to the working directory). A custom image must already exist on the runner as a local image ID or a pulled repository digest. The adapter compares its OCI revision label with the expected SHA before launch and records the selected image and revision. Build the image from clean source: the label is build metadata supplied by your build.
+
+```yaml
+  env:
+    STREAMTRUST_OPEN_WEBUI_REF: ${{ github.sha }}
+```
+
 
 ## Run in CI
 
@@ -35,7 +51,7 @@ Commit the generated adapter and consumer lockfile. On an Ubuntu Docker runner, 
 ```yaml
 - uses: santoshsibyala/streamtrust-action@v1
   with:
-    version: '0.5.0'
+    version: '0.6.0'
     adapter: open-webui/adapter.mjs
     repetitions: '3'
     timeout-ms: '900000'

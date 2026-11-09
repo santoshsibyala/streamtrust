@@ -4,14 +4,14 @@ import { randomUUID } from "node:crypto";
 import { execFileSync } from "node:child_process";
 import { startProvider, until } from "./provider.mjs";
 
-const image =
+const pinnedImage =
   "ghcr.io/open-webui/open-webui@sha256:283efb20756785229a388bcd1e56a052f5284ae8c861717eed5eaaa3bba6b20a";
-const revision = "c38885a1a737da4968f157092f304f3b5481d0bf";
+const pinnedRevision = "c38885a1a737da4968f157092f304f3b5481d0bf";
 const scenarios = [
-  "persistence.shared",
+  "persistence",
   "cancellation.provider-abort-saved-partial",
-  "regeneration.shared-active-sibling",
-  "error-retry.shared-saved-visible",
+  "regeneration",
+  "error-retry",
 ];
 const docker = (args, env = {}) =>
   execFileSync("docker", args, {
@@ -40,6 +40,26 @@ async function saved(page) {
 }
 
 export default async function create() {
+  const image = process.env.STREAMTRUST_OPEN_WEBUI_IMAGE ?? pinnedImage;
+  const ref = process.env.STREAMTRUST_OPEN_WEBUI_REF ?? pinnedRevision;
+  const revision = ref === "current"
+    ? execFileSync("git", ["rev-parse", "HEAD"], {
+        cwd: process.env.STREAMTRUST_OPEN_WEBUI_ROOT ?? process.cwd(),
+        encoding: "utf8",
+      }).trim()
+    : ref;
+  if (!/^[0-9a-f]{40}$/.test(revision))
+    throw Error("STREAMTRUST_OPEN_WEBUI_REF must be a full lowercase SHA or current");
+  if (image === pinnedImage && revision !== pinnedRevision)
+    throw Error("Supply an immutable Open WebUI image built from the expected revision");
+  if (image !== pinnedImage) {
+    if (!/^(?:[a-z0-9][a-z0-9._:/-]*@)?sha256:[0-9a-f]{64}$/.test(image))
+      throw Error("Supply a local image ID or repository digest for Open WebUI");
+    const label = docker(["image", "inspect", "--format",
+      '{{index .Config.Labels "org.opencontainers.image.revision"}}', image]);
+    if (label !== revision)
+      throw Error("Open WebUI image revision label differs from the expected checkout");
+  }
   const name = "streamtrust-webui-" + randomUUID();
   const key = randomUUID(),
     password = randomUUID(),

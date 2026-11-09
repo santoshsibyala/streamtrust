@@ -12,7 +12,7 @@ StreamTrust is a CI check for streaming applications such as AI chat. Its reusab
 - **Repeated runs.** Each scenario runs N times and the report shows every repetition, because cancellation and retry bugs are often intermittent.
 - **Your contract, written down.** An adapter implements your app's start, stream, cancel, retry and saved-state operations; StreamTrust invokes the adapter scenarios and writes JSON, JUnit, Markdown and HTML reports.
 
-**Status:** `0.5.0`, an early 0.x release for independent teams. APIs and report formats may change before 1.0. The CLI is dependency-free, ESM, and requires Node.js 22+. MIT licensed. Browser and database libraries belong to your adapter and are not installed by StreamTrust.
+**Status:** `0.6.0`, an early 0.x release for independent teams. APIs and report formats may change before 1.0. The CLI is dependency-free, ESM, and requires Node.js 22+. MIT licensed. Browser and database libraries belong to your adapter and are not installed by StreamTrust.
 
 ## Watch the 66-second demo
 
@@ -30,7 +30,7 @@ npx streamtrust init
 npx streamtrust verify --adapter ./streamtrust/adapter.mjs
 ```
 
-For reproducible CI, pin `streamtrust@0.5.0` and commit your lockfile. The generated adapter initially exercises the bundled demonstration; map it to your application before using its results as application evidence.
+For reproducible CI, pin `streamtrust@0.6.0` and commit your lockfile. The generated adapter initially exercises the bundled demonstration; map it to your application before using its results as application evidence.
 
 ## GitHub Action
 
@@ -94,7 +94,7 @@ Build the tarball with `npm pack` in this repository.
 Put the supplied tarball in your project's `vendor/` directory, then:
 
 ```sh
-npm install --save-dev ./vendor/streamtrust-0.5.0.tgz
+npm install --save-dev ./vendor/streamtrust-0.6.0.tgz
 npx streamtrust init
 npx streamtrust verify --adapter ./streamtrust/adapter.mjs
 ```
@@ -190,7 +190,7 @@ Add StreamTrust as a test step in your existing CI. For GitHub Actions, follow t
 1. Install StreamTrust and create the starting adapter:
 
    ```sh
-   npm install --save-dev --save-exact streamtrust@0.5.0
+   npm install --save-dev --save-exact streamtrust@0.6.0
    npx streamtrust init
    ```
 

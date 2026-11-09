@@ -5,7 +5,7 @@ import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 
 import { startProvider, until } from "./provider.mjs";
-const commit = "1d3dc331512929a4b1d3e82354e72acce33b5c7a";
+const pinnedCommit = "1d3dc331512929a4b1d3e82354e72acce33b5c7a";
 
 async function availablePort() {
   const socket = createServer();
@@ -26,8 +26,12 @@ async function create() {
   const root = resolve(process.env.STREAMTRUST_NEXTCHAT_ROOT);
   const git = (...args) =>
     execFileSync("git", args, { cwd: root, encoding: "utf8" }).trim();
+  const commit = git("rev-parse", "HEAD");
+  const expected = process.env.STREAMTRUST_NEXTCHAT_REF ?? pinnedCommit;
+  if (expected !== "current" && !/^[0-9a-f]{40}$/.test(expected))
+    throw Error("STREAMTRUST_NEXTCHAT_REF must be a full lowercase SHA or current");
   if (
-    git("rev-parse", "HEAD") !== commit ||
+    (expected !== "current" && commit !== expected) ||
     git("status", "--porcelain", "--untracked-files=no")
   )
     throw Error("Expected clean pinned NextChat source");
@@ -119,8 +123,8 @@ async function create() {
       commit,
     }),
     scenarios: [
-      "persistence",
-      "cancellation",
+      "persistence.saved-turn",
+      "cancellation.saved-partial",
       "regeneration.replace-turn",
       "error-retry.replace-turn-same-session",
     ],
@@ -183,7 +187,7 @@ async function create() {
           async () => (await text()).includes(c.prefix),
           "first chunk displayed",
         );
-        if (scenario === "cancellation") {
+        if (scenario === "cancellation.saved-partial") {
           await page
             .getByText("Stop", { exact: true })
             .last()
@@ -246,7 +250,7 @@ async function create() {
           c.finish();
         }
         const expected =
-          scenario === "cancellation" ? c.prefix : c.prefix + c.suffix;
+          scenario === "cancellation.saved-partial" ? c.prefix : c.prefix + c.suffix;
         await until(
           async () => (await text()).includes(expected),
           "answer visible",
@@ -277,7 +281,7 @@ async function create() {
           (await text()).includes(expected),
         );
         check("No extra provider call", calls().length === (retry ? 2 : 1));
-        if (scenario === "cancellation")
+        if (scenario === "cancellation.saved-partial")
           check(
             "No late completion displayed",
             !(await text()).includes(c.suffix),

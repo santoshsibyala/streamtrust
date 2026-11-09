@@ -4,11 +4,11 @@ This preset runs a **built local LibreChat checkout**, native browser UI and rea
 
 ## Installation
 
-Use Node.js 24 and npm 11. In a separate verification project, install StreamTrust 0.4.0 from npm:
+Use Node.js 24 and npm 11. In a separate verification project, install StreamTrust 0.6.0 from npm:
 
 ```sh
 npm init -y
-npm install --save-dev --save-exact streamtrust@0.4.0
+npm install --save-dev --save-exact streamtrust@0.6.0
 npm install --save-dev --save-exact playwright@1.64.1 mongodb@6.20.0 mongodb-memory-server@11.3.0
 npx playwright install chromium
 npx streamtrust init streamtrust-librechat --preset librechat
@@ -74,6 +74,18 @@ Use a fresh report directory for each job. Restrict workflow permissions to `con
 
 Exit 0 means all declared checks passed; 1 means failed or unsupported checks; 2 means setup, timeout, or harness error. Keep the exit status: do not use `continue-on-error`. Inspect reports before calling a failure an upstream defect.
 
+## Running in your own CI
+
+Point `STREAMTRUST_LIBRECHAT_ROOT` at your clean, built checkout and set `STREAMTRUST_LIBRECHAT_COMMIT` to its full lowercase Git SHA or `current`. Both setup and verification accept the same setting. With `current`, setup requires an existing checkout. Omitting the setting keeps the documented pin. The report records the actual checked-out SHA.
+
+```yaml
+  env:
+    STREAMTRUST_LIBRECHAT_ROOT: ${{ github.workspace }}
+    STREAMTRUST_LIBRECHAT_COMMIT: ${{ github.sha }}
+```
+
+Use these variables on the steps that build and verify your checkout.
+
 ## Run in CI
 
 To use the published GitHub Action, keep the checkout, dependency installation, Playwright installation, and build steps in the CI example above. Replace only its verify step with:
@@ -83,7 +95,7 @@ To use the published GitHub Action, keep the checkout, dependency installation, 
   uses: santoshsibyala/streamtrust-action@v1
   with:
     adapter: streamtrust-librechat/adapter.mjs
-    version: '0.4.0'
+    version: '0.6.0'
     node-version: '24'
     output: reports/librechat
     repetitions: '3'
