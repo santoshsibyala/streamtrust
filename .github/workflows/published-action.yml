@@ -17,16 +17,16 @@ jobs:
           node-version: '22'
           package-manager-cache: false
       - name: Initialize published HTTP/SSE example
-        run: npx --yes streamtrust@0.6.0 init published-example
+        run: npx --yes streamtrust@0.6.1 init published-example
         env:
           npm_config_ignore_scripts: 'true'
           npm_config_audit: 'false'
           npm_config_fund: 'false'
       - name: Verify published example and publish job summary
-        uses: santoshsibyala/streamtrust-action@83ba0de491861a7d805dec1e10d61d97e69555b2 # v1.0.1
+        uses: santoshsibyala/streamtrust-action@3e737561271ef98c88d583a956e0aff5f7e0103c # v1.1.0
         with:
           adapter: published-example/adapter.mjs
-          version: '0.6.0'
+          version: '0.6.1'
           node-version: '22'
           output: reports/published-action
           repetitions: '3'
