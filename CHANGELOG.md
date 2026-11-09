@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.6.1
+
+- Fixed: generated browser adapters now declare Playwright and give a folder-specific install command when it is missing. LibreChat also declares its MongoDB dependencies.
+
 ## 0.6.0
 
 ### Breaking changes

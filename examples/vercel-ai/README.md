@@ -8,12 +8,11 @@ Use Node.js 22 or newer (AI SDK 7 requires it). This preset has been available s
 
 ```sh
 npm init -y
-npm install --save-dev --save-exact streamtrust@0.4.0 playwright@1.64.1
-npx playwright install chromium
+npm install --save-dev --save-exact streamtrust@0.6.1
 npx streamtrust init streamtrust-vercel-ai --preset vercel-ai
+(cd streamtrust-vercel-ai && npm install && npx playwright install --with-deps chromium)
 node streamtrust-vercel-ai/setup.mjs
-npx streamtrust verify --adapter streamtrust-vercel-ai/adapter.mjs \
-  --output reports/vercel-ai --repetitions 3
+npx streamtrust@0.6.1 verify --adapter streamtrust-vercel-ai/adapter.mjs --repetitions 3 --timeout-ms 900000
 ```
 
 `setup.mjs` installs and builds `streamtrust-vercel-ai/reference-app` (Next.js 16, AI SDK 7, pinned exact versions). The bundled `npm-shrinkwrap.json` pins transitive dependencies and setup uses `npm ci`. Commit the generated preset including this lockfile, and ignore `reference-app/node_modules/` and `reference-app/.next/`. Build and verification time depend on the machine. A cold install needs network access for npm and the Chromium download.
@@ -45,7 +44,7 @@ The reference app is a demonstration: **its passing says nothing about your appl
 ```sh
 export STREAMTRUST_VERCEL_AI_ROOT=/path/to/your/next-app
 # Build your isolated checkout using its usual build command.
-npx streamtrust verify --adapter streamtrust-vercel-ai/adapter.mjs --output reports/vercel-ai
+npx streamtrust@0.6.1 verify --adapter streamtrust-vercel-ai/adapter.mjs --output reports/vercel-ai
 ```
 
 Then edit `adapter.mjs` where your app differs. Expect HARNESS_ERROR, not FAIL, until the mapping matches:
@@ -75,7 +74,8 @@ Run the installation steps once, then commit your verification project package.j
     node-version: '22'
     cache: npm
 - run: npm ci
-- run: npx --no-install playwright install --with-deps chromium
+- run: npm ci && npx playwright install --with-deps chromium
+  working-directory: streamtrust-vercel-ai
 - run: node streamtrust-vercel-ai/setup.mjs
 - name: Verify AI SDK app
   run: npx --no-install streamtrust verify --adapter streamtrust-vercel-ai/adapter.mjs --output reports/vercel-ai --repetitions 3
@@ -102,7 +102,7 @@ To use the published GitHub Action, keep the checkout, dependency installation, 
   uses: santoshsibyala/streamtrust-action@v1
   with:
     adapter: streamtrust-vercel-ai/adapter.mjs
-    version: '0.4.0'
+    version: '0.6.1'
     node-version: '22'
     output: reports/vercel-ai
     repetitions: '3'

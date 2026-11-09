@@ -4,14 +4,13 @@ This preset runs a **built local LibreChat checkout**, native browser UI and rea
 
 ## Installation
 
-Use Node.js 24 and npm 11. In a separate verification project, install StreamTrust 0.6.0 from npm:
+Use Node.js 24 and npm 11. In a separate verification project, install StreamTrust 0.6.1 from npm:
 
 ```sh
 npm init -y
-npm install --save-dev --save-exact streamtrust@0.6.0
-npm install --save-dev --save-exact playwright@1.64.1 mongodb@6.20.0 mongodb-memory-server@11.3.0
-npx playwright install chromium
+npm install --save-dev --save-exact streamtrust@0.6.1
 npx streamtrust init streamtrust-librechat --preset librechat
+(cd streamtrust-librechat && npm install && npx playwright install --with-deps chromium)
 ```
 
 Use Node.js 24 and npm 11 for this preset. Commit the generated adapter and your package lock. The core CLI still has no runtime dependencies; browser/database dependencies belong to the verification project. Browser, MongoDB binary and LibreChat installation require network access and disk space. The first build takes several minutes; this is not a five-minute cold installation.
@@ -21,8 +20,7 @@ Use Node.js 24 and npm 11 for this preset. Commit the generated adapter and your
 ```sh
 export STREAMTRUST_LIBRECHAT_ROOT="$PWD/.cache/librechat"
 node streamtrust-librechat/setup.mjs
-npx streamtrust verify --adapter streamtrust-librechat/adapter.mjs \
-  --output reports/librechat --repetitions 3 --timeout-ms 600000
+npx streamtrust@0.6.1 verify --adapter streamtrust-librechat/adapter.mjs --repetitions 3 --timeout-ms 900000
 ```
 
 The setup script clones and builds commit `a378657583567310c841d652b0f6b00c83e2bd6b`. It refuses to reset an existing or dirty checkout. The verifier starts its own loopback-only server, chooses an available port, creates a synthetic test user, and tears down its browser, provider and disposable database. The preset refuses checkouts containing `.env`, `.env.local` or `.env.production`. Do not place production configuration in this checkout.
@@ -49,7 +47,8 @@ In your verification project, install once and commit package.json/package-lock.
     node-version: '24'
     cache: npm
 - run: npm ci
-- run: npx --no-install playwright install --with-deps chromium
+- run: npm ci && npx playwright install --with-deps chromium
+  working-directory: streamtrust-librechat
 - name: Build isolated LibreChat checkout
   run: node streamtrust-librechat/setup.mjs
   env:
@@ -95,7 +94,7 @@ To use the published GitHub Action, keep the checkout, dependency installation, 
   uses: santoshsibyala/streamtrust-action@v1
   with:
     adapter: streamtrust-librechat/adapter.mjs
-    version: '0.6.0'
+    version: '0.6.1'
     node-version: '24'
     output: reports/librechat
     repetitions: '3'

@@ -10,6 +10,7 @@ import { join, resolve } from 'node:path';
 import { createHash, randomUUID } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 
+import { chromium } from 'playwright';
 import { startProvider } from './provider.mjs';
 
 // Visible text the app renders for a failed generation; change it for your app.
@@ -48,8 +49,6 @@ async function createAdapter() {
       });
     }));
   const baseUrl = `http://127.0.0.1:${port}`;
-  const require = createRequire(resolve(process.cwd(), 'package.json'));
-  const { chromium } = require('playwright');
   const appRequire = createRequire(resolve(root, 'package.json'));
   const lockPath = ['npm-shrinkwrap.json', 'package-lock.json'].map((name) => resolve(root, name)).find(existsSync);
   const versions = Object.fromEntries(

@@ -2,9 +2,10 @@ import { fork } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
 import { resolve, join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { mkdir, copyFile, open, unlink, readFile } from 'node:fs/promises';
+import { mkdir, copyFile, open, unlink, readFile, writeFile } from 'node:fs/promises';
 import { constants } from 'node:fs';
 import { VERSION, failureReport } from './index.js';
+import { dependencies, installCommand, quote } from './browser-setup.js';
 const EXAMPLES = fileURLToPath(new URL('../examples/', import.meta.url));
 // Explicit source inventory: never copy local builds, dependencies or configuration.
 const PRESETS = {
@@ -68,9 +69,33 @@ export async function main(args) {
           );
           created.push(destination);
         }
+        if (preset !== 'http') {
+          const manifest = resolve(dir, 'package.json');
+          try {
+            await writeFile(manifest, JSON.stringify({ private: true, dependencies: dependencies(preset) }, null, 2) + '\n', { flag: 'wx' });
+            created.push(manifest);
+          } catch (error) {
+            if (error.code !== 'EEXIST') throw error;
+          }
+        }
       } catch (error) {
         await Promise.all(created.map((path) => unlink(path)));
         throw error;
+      }
+      if (preset !== 'http') {
+        console.log(`Created ${dir}\n${installCommand(dir, dependencies(preset))}`);
+        if (preset === 'nextchat' && !process.env.STREAMTRUST_NEXTCHAT_ROOT) {
+          console.log('export STREAMTRUST_NEXTCHAT_ROOT="$PWD/.cache/NextChat"');
+          console.log('git clone https://github.com/ChatGPTNextWeb/NextChat.git "$STREAMTRUST_NEXTCHAT_ROOT"');
+          console.log('git -C "$STREAMTRUST_NEXTCHAT_ROOT" checkout --detach 1d3dc331512929a4b1d3e82354e72acce33b5c7a');
+          console.log('(cd "$STREAMTRUST_NEXTCHAT_ROOT" && npx --yes --package=yarn@1.22.22 -- yarn install --frozen-lockfile --ignore-scripts)');
+        }
+        if (preset === 'librechat' && !process.env.STREAMTRUST_LIBRECHAT_ROOT)
+          console.log('export STREAMTRUST_LIBRECHAT_ROOT="$PWD/.cache/librechat"');
+        if (preset === 'librechat' || preset === 'vercel-ai')
+          console.log('node ' + quote(resolve(dir, 'setup.mjs')));
+        console.log(`npx streamtrust@${VERSION} verify --adapter ` + quote(resolve(dir, 'adapter.mjs')) + ' --repetitions 3 --timeout-ms 900000');
+        return 0;
       }
       console.log(
         `Created ${dir}\nRun: streamtrust verify --adapter ${JSON.stringify(resolve(dir, 'adapter.mjs'))}`,
