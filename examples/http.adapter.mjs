@@ -71,7 +71,7 @@ export default async function createAdapter({ signal } = {}) {
     name: demo
       ? 'Local HTTP/SSE demonstration'
       : 'Your application HTTP adapter',
-    scenarios: ['persistence', 'cancellation', 'retry'],
+    scenarios: ['persistence.http-sse', 'cancellation.http-sse', 'retry.http-sse'],
     async metadata() {
       return {
         mode: demo
@@ -84,7 +84,7 @@ export default async function createAdapter({ signal } = {}) {
     },
     async run(scenario) {
       const initial = await json('/runs', 'POST');
-      if (scenario === 'cancellation') {
+      if (scenario === 'cancellation.http-sse') {
         const stream = await watch(initial.id);
         try {
           const first = await stream.next();
@@ -120,7 +120,7 @@ export default async function createAdapter({ signal } = {}) {
         }
       }
       const original = await complete(initial.id);
-      if (scenario === 'persistence')
+      if (scenario === 'persistence.http-sse')
         return {
           checks: [
             {

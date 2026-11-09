@@ -8,7 +8,7 @@ In a verification project with Node 22 (the install command selects Yarn Classic
 
 ```sh
 npm init -y
-npm install --save-dev --save-exact streamtrust@0.4.0 playwright@1.64.1
+npm install --save-dev --save-exact streamtrust@0.6.0 playwright@1.64.1
 npx playwright install chromium
 npx streamtrust init nextchat
 export STREAMTRUST_NEXTCHAT_ROOT="$PWD/.cache/NextChat"
@@ -24,8 +24,8 @@ Use a dedicated checkout with clean tracked files and no development dotenv file
 
 | Scenario | Expected outcome after reload |
 |---|---|
-| Persistence | One assistant answer matches the complete provider response, with one generation. |
-| Cancellation | Clicking Stop after the first chunk preserves only the partial answer. Late completion text stays absent even if the provider can finish. |
+| `persistence.saved-turn` | One assistant answer matches the complete provider response, with one generation. |
+| `cancellation.saved-partial` | Clicking Stop after the first chunk preserves only the partial answer. Late completion text stays absent even if the provider can finish. |
 | `regeneration.replace-turn` | Before Retry, the completed first answer is saved. After reload, the original assistant ID is absent and the sole assistant answer matches the second response. |
 | `error-retry.replace-turn-same-session` | After a mid-stream disconnect, the first partial answer is saved before Retry. The replacement survives reload and the original assistant ID is absent. |
 
@@ -33,16 +33,30 @@ NextChat intentionally replaces the previous turn on Retry, so these NextChat-sp
 
 The adapter reads the selected session in the persisted Zustand record `chat-next-web-store` (IndexedDB database `keyval-store`, object store `keyval`; NextChat also supports localStorage fallback). It compares assistant text from storage with the rendered page and counts streaming provider calls. This tests browser-local persistence in one session. The Stop check covers visible and saved output. It does not establish server-side cancellation. The retry check covers recovery in the same session, without requiring a durable error flag or sibling branches. The pre-Retry read checks partial text for error retry. Whether a failure flag survives a reload before Retry is outside this scenario. Per-run evidence contains only booleans. Message text and IDs stay in memory. A changed selector or unreadable storage can produce a harness error.
 
+## Running in your own CI
+
+Set `STREAMTRUST_NEXTCHAT_ROOT` to the installed NextChat checkout and `STREAMTRUST_NEXTCHAT_REF` to its full lowercase Git SHA. Use `current` to accept the checkout's actual HEAD. Omitting the ref keeps the original pin. Both modes require clean tracked files and record the actual SHA.
+
+In the Action step below, use this environment when the checked-out repository is NextChat:
+
+```yaml
+  env:
+    STREAMTRUST_NEXTCHAT_ROOT: ${{ github.workspace }}
+    STREAMTRUST_NEXTCHAT_REF: ${{ github.sha }}
+```
+
+Use the SHA actually checked out (PR workflows commonly check out a merge commit).
+
 ## Run in CI
 
-After installing the locked consumer dependencies, installing Chromium, and preparing the pinned checkout above, export `STREAMTRUST_NEXTCHAT_ROOT` for the job. Commit the generated adapter and helper. With CLI 0.4.0 published, use the [StreamTrust Action](https://github.com/santoshsibyala/streamtrust-action):
+After installing the locked consumer dependencies, installing Chromium, and preparing the pinned checkout above, export `STREAMTRUST_NEXTCHAT_ROOT` for the job. Commit the generated adapter and helper. Use the [StreamTrust Action](https://github.com/santoshsibyala/streamtrust-action):
 
 ```yaml
 - name: Verify NextChat
   uses: santoshsibyala/streamtrust-action@v1
   with:
     adapter: nextchat/adapter.mjs
-    version: '0.4.0'
+    version: '0.6.0'
     node-version: '22'
     repetitions: '3'
     timeout-ms: '900000'
