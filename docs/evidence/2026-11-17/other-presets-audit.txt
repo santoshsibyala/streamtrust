@@ -1,0 +1,9 @@
+Source audit performed now, not claimed as pre-release work. Scope: v0.6.2 examples/nextchat/adapter.mjs, examples/open-webui/adapter.mjs, examples/vercel-ai/adapter.mjs, compared with v0.6.1. No differences in these presets between those tags; no changes made in this follow-up.
+
+NextChat: no endpoint/model selection menu analogous to LibreChat. Uses textarea/Stop/Retry locators; waits for first provider call/chunk, Stop to disappear, Retry to become visible, and saved state/reload. No matching selected-suffix lookup found. See lines 179-231 and 250-275.
+
+Open WebUI: waits for the configured model's visible text at lines 198-201 before submitting. No matching selected-suffix option lookup found. A related asynchronous risk remains: lines 274-278 check an optional regeneration menu once with isVisible() immediately after clicking Regenerate. A delayed menu could be missed, followed by a timeout waiting for the second provider call. This is a source-level possibility, not a reproduced defect; the pinned CI job passed. No change was made or released for this pattern. We do not claim a comprehensive absence of timing races.
+
+Vercel AI SDK: the bundled reference UI has no model menu; exact Stop/Regenerate locators are action buttons. It waits for textbox, first chunk, generation settlement and persistence/reload. No matching selected-option lookup found. See lines 172-196 and 215-282. No changes made.
+
+Existing PR13 workflow results for these three presets were green. Those results are evidence for their pinned test scenarios, not proof against every possible UI race. This audit does not add lifecycle executions to the LibreChat total.
