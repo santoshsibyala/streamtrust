@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.2 (unreleased)
+
+- Fixed: LibreChat model selection accepts the accessible “selected” suffix and waits for the fixture model label before submitting. This prevents intermittent pre-submit harness errors on v0.8.9 without changing lifecycle assertions.
+- Added: browser regression coverage for selected/unselected options, delayed readiness, and a model that never becomes ready. The LibreChat workflow tests the helper from the packed, generated preset.
+- Existing generated adapters are not updated by upgrading the CLI alone. Generate the LibreChat preset in a new directory and merge both `adapter.mjs` and the new `model-selection.mjs` into customized adapters.
+
 ## 0.6.1
 
 - Fixed: generated browser adapters now declare Playwright and give a folder-specific install command when it is missing. LibreChat also declares its MongoDB dependencies.
