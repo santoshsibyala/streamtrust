@@ -7,3 +7,7 @@ Local validation: 21 core tests passed; four browser regression cases passed aga
 Before release, review the PR checks, including both LibreChat revisions and all existing integration workflows. Keep the original v0.8.9 investigation evidence separate from release-candidate validation. Existing generated adapters need both the updated adapter and new `model-selection.mjs` helper; a CLI upgrade alone does not replace them.
 
 This preparation does not include a release tag or npm publication. The published-package smoke workflow stays pinned to the existing 0.6.1 release until publication is separately authorized.
+
+## Follow-up after 0.6.2
+
+- Open WebUI preset: replace the one-time isVisible() submenu check with an explicit wait for the submenu/option (same class of timing risk as the LibreChat 0.6.2 fix; not reproduced; pinned CI passes). See [other-presets-audit.txt](docs/evidence/2026-11-17/other-presets-audit.txt).
