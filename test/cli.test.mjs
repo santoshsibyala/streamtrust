@@ -143,6 +143,19 @@ test('unsupported scenarios are non-green and setup/cleanup errors remain harnes
   }
 });
 
+test('LibreChat init includes the model selection helper from the package', async () => {
+  const cwd = await mkdtemp(join(tmpdir(), 'streamtrust-librechat-helper-'));
+  try {
+    assert.equal((await run(['init', 'integration', '--preset', 'librechat'], cwd)).code, 0);
+    assert.equal(
+      await readFile(join(cwd, 'integration/model-selection.mjs'), 'utf8'),
+      await readFile(new URL('../examples/librechat/model-selection.mjs', import.meta.url), 'utf8'),
+    );
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
 test('CLI and success/error reports identify the installed package version', async () => {
   const { version } = JSON.parse(
     await readFile(new URL('../package.json', import.meta.url), 'utf8'),

@@ -10,7 +10,7 @@ const EXAMPLES = fileURLToPath(new URL('../examples/', import.meta.url));
 // Explicit source inventory: never copy local builds, dependencies or configuration.
 const PRESETS = {
   http: [['http.adapter.mjs', 'adapter.mjs'], ['demo-app.mjs', 'demo-app.mjs']],
-  librechat: ['adapter.mjs', 'provider.mjs', 'setup.mjs', 'README.md'].map(
+  librechat: ['adapter.mjs', 'model-selection.mjs', 'provider.mjs', 'setup.mjs', 'README.md'].map(
     (name) => [`librechat/${name}`, name]),
   'vercel-ai': [
     'adapter.mjs', 'provider.mjs', 'setup.mjs', 'config.mjs', 'README.md',

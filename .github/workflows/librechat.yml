@@ -5,6 +5,7 @@ on:
     paths:
       - 'examples/librechat/**'
       - 'src/**'
+      - 'test/librechat-model-selection.browser.mjs'
       - 'package.json'
       - '.github/workflows/librechat.yml'
 permissions:
@@ -13,6 +14,16 @@ jobs:
   librechat:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: default-pin
+            commit: a378657583567310c841d652b0f6b00c83e2bd6b
+          - target: v0.8.9
+            commit: d4e85d2205c78413ee27d631d7e3b7313556f21d
+    env:
+      STREAMTRUST_LIBRECHAT_COMMIT: ${{ matrix.commit }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
@@ -29,6 +40,10 @@ jobs:
           npm install --save-dev "$RUNNER_TEMP/streamtrust-$(node -p "require('$GITHUB_WORKSPACE/package.json').version").tgz"
           npx --no-install streamtrust init streamtrust-librechat --preset librechat
           (cd streamtrust-librechat && npm install && npx playwright install --with-deps chromium)
+      - name: Regress model selection in a real browser using the packaged helper
+        run: npm run test:librechat-browser
+        env:
+          STREAMTRUST_LIBRECHAT_TEST_PRESET: ${{ runner.temp }}/consumer/streamtrust-librechat
       - name: Build pinned LibreChat
         working-directory: ${{ runner.temp }}/consumer
         run: node streamtrust-librechat/setup.mjs
@@ -42,7 +57,7 @@ jobs:
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         if: always()
         with:
-          name: librechat-safe-reports
+          name: librechat-safe-reports-${{ matrix.target }}
           path: |
             ${{ runner.temp }}/consumer/reports/librechat/report.json
             ${{ runner.temp }}/consumer/reports/librechat/report.md

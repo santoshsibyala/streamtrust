@@ -11,6 +11,7 @@ import { createHash, randomBytes } from 'node:crypto';
 
 import { chromium } from 'playwright';
 import { startProvider } from './provider.mjs';
+import { ensureFixtureModel } from './model-selection.mjs';
 
 const PIN = 'a378657583567310c841d652b0f6b00c83e2bd6b';
 export async function until(check, label, ms = 20000) {
@@ -291,23 +292,7 @@ async function createAdapter() {
         try {
           await p.goto(`${baseUrl}/c/new`);
           await p.getByRole('textbox', { name: 'Message input' }).waitFor();
-          const selector = p
-            .getByRole('button', { name: 'Select a model' })
-            .first();
-          if (
-            (await selector.count()) &&
-            !(await selector.innerText()).includes('fixture-model')
-          ) {
-            await selector.click();
-            await p
-              .getByRole('option', { name: 'StreamTrust Fixture', exact: true })
-              .click();
-            const model = p.getByRole('option', {
-              name: 'fixture-model',
-              exact: true,
-            });
-            if (await model.isVisible().catch(() => false)) await model.click();
-          }
+          await ensureFixtureModel(p, until);
           const before = provider.generations.length;
           await p
             .getByRole('textbox', { name: 'Message input' })

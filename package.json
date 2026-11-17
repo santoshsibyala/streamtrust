@@ -1,6 +1,6 @@
 {
   "name": "streamtrust",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "description": "Adapter-driven CI verification for streaming application lifecycle guarantees",
   "type": "module",
   "license": "MIT",
@@ -45,7 +45,8 @@
   ],
   "scripts": {
     "test": "node --test test/*.test.mjs",
-    "prepack": "npm test"
+    "prepack": "npm test",
+    "test:librechat-browser": "node --test test/librechat-model-selection.browser.mjs"
   },
   "keywords": [
     "ci",
