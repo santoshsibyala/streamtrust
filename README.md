@@ -1,12 +1,16 @@
 # StreamTrust CLI
 
-[![npm version](https://img.shields.io/npm/v/streamtrust.svg)](https://www.npmjs.com/package/streamtrust)
+[![npm version](https://img.shields.io/npm/v/streamtrust.svg)](https://www.npmjs.com/package/streamtrust) [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE) [![CI status](https://img.shields.io/github/actions/workflow/status/santoshsibyala/streamtrust/ci.yml?branch=main&label=CI)](https://github.com/santoshsibyala/streamtrust/actions/workflows/ci.yml) [![GitHub Marketplace: StreamTrust CI Verifier](https://img.shields.io/badge/GitHub%20Marketplace-StreamTrust%20CI%20Verifier-blue)](https://github.com/marketplace/actions/streamtrust-ci-verifier)
 
-**[View StreamTrust on npm](https://www.npmjs.com/package/streamtrust)**
+## About
+
+StreamTrust checks that what users see in an AI chat app after Stop, Retry or refresh matches what the app actually saved.
+
+Free and open source under the MIT license.
+
+[Releases / What's new](https://github.com/santoshsibyala/streamtrust/releases) · [CHANGELOG](CHANGELOG.md) · [Six-app study](https://santoshsibyala.github.io/streamtrust/blog/six-chat-apps/)
 
 StreamTrust is a CI check for streaming applications such as AI chat. Its reusable checks compare what was displayed with what the application authoritatively saved and report disagreements as failed checks. It does not replace Playwright: Playwright drives the browser, and the bundled presets use it inside their adapters.
-
-[Read the six-app study: What six AI chat apps saved after Stop, Retry, and reload](https://santoshsibyala.github.io/streamtrust/blog/six-chat-apps/)
 
 - **Three outcomes, kept apart.** "The app failed" (FAIL), "this capability is not supported" (UNSUPPORTED) and "we could not determine whether it failed" (HARNESS_ERROR) are reported separately, and harness errors exit with their own code.
 - **Repeated runs.** Each scenario runs N times and the report shows every repetition, because cancellation and retry bugs are often intermittent.
@@ -285,3 +289,30 @@ Use a unique output directory per concurrent job. The CLI takes an exclusive loc
 StreamTrust checks what an adapter asserts. It does not prove exactly-once external effects, AI factuality, automatic recovery, production incident rates or adoption. The HTTP demo is synthetic. Separate development experiments have tested pinned Vercel Chatbot and LibreChat applications; the LibreChat adapter is now available as an npm preset with optional dependencies. The `vercel-ai` preset targets its own minimal reference app, not the Vercel Chatbot template; that experiment remains separate.
 
 Local preparation: `npm pack` in this package directory runs the package tests and creates the tarball. The public repository runs tests and a clean tarball installation on Node.js 22 and 24. This release is published interactively; npm build provenance is not configured.
+
+## Third-party notices
+
+The published StreamTrust CLI has zero runtime dependencies: its package metadata declares no runtime dependencies. Browser presets install dependencies separately in their generated adapter folders:
+
+| Package | Declared version (as of 0.6.2) | License | Used by |
+|---|---|---|---|
+| [Playwright](https://github.com/microsoft/playwright) | 1.64.1 | Apache-2.0 | All browser presets |
+| [MongoDB Node.js driver](https://github.com/mongodb/node-mongodb-native) (`mongodb`) | 6.20.0 | Apache-2.0 | LibreChat preset |
+| [MongoDB Memory Server](https://github.com/typegoose/mongodb-memory-server) (`mongodb-memory-server`) | 11.3.0 | MIT | LibreChat preset |
+
+These are the direct adapter dependencies, not a complete inventory of their transitive dependencies, browser binaries or database binaries; those retain their respective licenses.
+
+The presets drive separate [LibreChat](https://github.com/LibreChat-AI/LibreChat), [NextChat](https://github.com/ChatGPTNextWeb/NextChat) and [Open WebUI](https://github.com/open-webui/open-webui) applications. Those applications are not bundled with StreamTrust and remain under their own licenses. The `vercel-ai` preset instead includes a minimal StreamTrust reference app under this repository's MIT license; it installs its own dependencies, including the [Vercel AI SDK](https://github.com/vercel/ai) (`ai` 7.0.138, Apache-2.0). The reference app's dependencies retain their own licenses; it is not the Vercel Chatbot template.
+
+## Help StreamTrust grow
+
+StreamTrust is free and open source. You can help by:
+
+- Starring [the repository](https://github.com/santoshsibyala/streamtrust).
+- [Reporting a bug or suggesting an idea](https://github.com/santoshsibyala/streamtrust/issues/new).
+- [Sharing feedback on which checks or presets would help your team](https://github.com/santoshsibyala/streamtrust/issues).
+- Telling other teams building AI chat apps about StreamTrust.
+
+## License
+
+StreamTrust is available under the [MIT license](LICENSE).

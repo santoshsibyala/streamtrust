@@ -11,3 +11,5 @@ This preparation does not include a release tag or npm publication. The publishe
 ## Follow-up after 0.6.2
 
 - Open WebUI preset: replace the one-time isVisible() submenu check with an explicit wait for the submenu/option (same class of timing risk as the LibreChat 0.6.2 fix; not reproduced; pinned CI passes). See [other-presets-audit.txt](docs/evidence/2026-11-17/other-presets-audit.txt).
+
+- Proposed CLI help addition for the next release (not implemented): `Free and open source under the MIT license. https://github.com/santoshsibyala/streamtrust` — `--version` and `--help` already show the version; add this line to `--help` while keeping `--version` machine-readable.
